@@ -1,4 +1,42 @@
 {
+  "codeRepas": {
+    "code": "STA24_9990",
+    "label": "Stage pour repas avec l'appli SHALZE"
+  },
+  "regimes": [
+    {
+      "code": "MPT_VEGE",
+      "color": "lightgreen",
+      "label": {
+        "EN": "Vegetarian",
+        "FR": "Végétarien"
+      }
+    },
+    {
+      "code": "MPT_WG-WM",
+      "color": "orange",
+      "label": {
+        "EN": "Gluten Free",
+        "FR": "Sans gluten"
+      }
+    },
+    {
+      "code": "MPT_WGLUTEN",
+      "color": "red",
+      "label": {
+        "EN": "Lactose Free",
+        "FR": "Sans lactose"
+      }
+    },
+    {
+      "code": "MPT_WMILK",
+      "color": "brown",
+      "label": {
+        "EN": "Gluten Free & Lactose Free",
+        "FR": "Sans gluten & sans lactose"
+      }
+    }
+  ],
   "language": {
     "FR": {
       "identify": "Identifiez-vous",
@@ -6,6 +44,10 @@
       "password": "Mot de passe",
       "loginButton": "Connexion",
       "loginError": "Identifiants incorrects",
+      "serverOff": "Serveur inopérant - Contactez l'administrateur",
+      "status202": "STATUT 202 - Contactez l'administrateur",
+      "userNotFound": "Utilisateur introuvable...",
+      "orderNotFound": "Pas de commande pour ce mois - Contactez l'accueil",
       "title": "SHALZE APP",
       "signin": "Se connecter",
       "signout": "Se déconnecter",
@@ -55,6 +97,10 @@
       "password": "Password",
       "loginButton": "Login",
       "loginError": "Incorrect Login Details",
+      "serverOff": "Server Out of Service - Please contact the administrator",
+      "status202": "STATUS 202 - Please contact the administrator",
+      "userNotFound": "User not Found...",
+      "orderNotFound": "No existing order for this month - Please contact the welcome office",
       "title": "SHALZE APP",
       "signin": "Sign In",
       "signout": "Sign Out",
@@ -85,12 +131,6 @@
         "Sunday"
       ],
       "week": "Week",
-      "regimes": [
-        { "code": "MPT_VEGE", "label": "Vegetarian" },
-        { "code": "MPT_WG-WM", "label": "Gluten Free" },
-        { "code": "MPT_WGLUTEN", "label": "Lactose Free" },
-        { "code": "MPT_WMILK", "label": "Gluten Free & Lactose Free" }
-      ],
 
       "meals": {
         "breakfast": "Breakfast",

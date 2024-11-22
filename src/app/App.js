@@ -1,55 +1,36 @@
 import React from "react";
 import "../fonts.css";
 import "./App.scss";
-
-// Import libraries
-import { useState, useEffect } from "react";
-import { useDispatch, shallowEqual, useSelector } from "react-redux";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+// Import Reducer
+import ConfigurationReducer from "../services/ConfigurationReducer";
+import DateReducer from "../services/DateReducer";
+import LoginReducer from "../services/LoginReducer";
+import OrderReducer from "../services/OrderReducer";
+import PlacesReducer from "../services/PlacesReducer";
+import RegimesReducer from "../services/RegimesReducer";
+import WeekStructureReducer from "../services/WeekStructureReducer";
 
 // Import Views
-import Header from "../views/Header";
-import LoginModal from "../views/LoginModal";
-
-// Import Actions
-import { getConfiguration } from "../services/ConfigurationActions";
+import OnePage from "../views/OnePage";
+export const store = configureStore({
+  reducer: {
+    configurationReducer: ConfigurationReducer,
+    dateReducer: DateReducer,
+    loginReducer: LoginReducer,
+    orderReducer: OrderReducer,
+    placesReducer: PlacesReducer,
+    regimesReducer: RegimesReducer,
+    weekStructureReducer: WeekStructureReducer,
+  },
+});
 
 function App() {
-  const dispatch = useDispatch();
-  let token = localStorage.getItem("token") || "";
-
-  // State instantiations:
-  const navLanguage = navigator.language || navigator.userLanguage;
-  let initLang = "";
-  if (navLanguage.includes("fr")) {
-    initLang = "FR";
-  } else {
-    initLang = "EN";
-  }
-  const [lang, setLang] = useState(initLang);
-
-  // Selector instantiations:
-  const config = useSelector(
-    (state) => state.configurationReducer.configuration,
-    shallowEqual
-  );
-  const modalClose = useSelector(
-    (state) => state.loginReducer.modalClose,
-    shallowEqual
-  );
-  const loginReducer = useSelector((state) => state.loginReducer);
-  useEffect(() => {
-    dispatch(getConfiguration());
-  }, [config, modalClose]);
   return (
-    <div>
-      <Header lang={lang} setLang={setLang} initLang={initLang} token={token} />
-      {!modalClose && config.language && !token && <LoginModal lang={lang} />}
-      <div className="center">
-        {loginReducer.error && loginReducer.error.code === "ERR_NETWORK" && (
-          <h2>Serveur inopérant: contacter l'administrateur</h2>
-        )}
-      </div>
-    </div>
+    <Provider store={store}>
+      <OnePage />
+    </Provider>
   );
 }
 

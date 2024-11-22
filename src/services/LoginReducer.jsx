@@ -2,6 +2,7 @@ import {
   LOG_USER_BEGIN,
   LOG_USER_SUCCESS,
   LOG_USER_FAILURE,
+  LOG_USER_WRONG_LOGIN,
   LOGOUT_USER_BEGIN,
   LOGOUT_USER_FAILURE,
   LOGOUT_USER_SUCCESS,
@@ -44,6 +45,14 @@ export default function LoginReducer(state = initialState, action) {
         modalClose: true,
         error: action.payload.error,
       };
+    case LOG_USER_WRONG_LOGIN:
+      return {
+        ...state,
+        loading: false,
+        modalClose: false,
+        error: action.payload.error,
+      };
+
     case LOGOUT_USER_BEGIN:
       return {
         ...state,

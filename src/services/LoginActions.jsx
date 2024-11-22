@@ -1,6 +1,6 @@
 import { const_apiurl } from "../Constant";
 import axios from "axios";
-import { store } from "../app/store";
+import { store } from "../app/App";
 
 export function loguser(username, password) {
   return (dispatch) => {
@@ -18,50 +18,58 @@ export function loguser(username, password) {
       ) // fetch token
       .then((json) => {
         console.log("loguserSuccess : ");
-        console.log(json);
-        let login = {
-          code: json.data.success.code,
-          token: json.data.success.token,
-          username: username,
-        };
-        dispatch(loguserSuccess(login));
-        localStorage.setItem("token", login.token);
-        axios
-          .get(
-            // fetch email from username
-            const_apiurl +
-              `users?sortfield=t.rowid&sortorder=ASC&sqlfilters=t.lastname:=:'${username}'` +
-              "&DOLAPIKEY=" +
-              login.token
-          )
-          .then((json) => {
-            console.log("fetchEmailSuccess : ");
-            const email = json.data[0].email;
-            localStorage.setItem("userEmail", email);
-            axios
-              .get(
-                // fetch userId from email
-                const_apiurl +
-                  "thirdparties/email/" +
-                  email +
-                  "?DOLAPIKEY=" +
-                  login.token
-              )
-              .then((json) => {
-                console.log("fetchEmailSuccess : ");
-                localStorage.setItem("userId", json.data.id);
-              });
-          })
-          .catch((error) => console.log(error));
-        return "";
-        // }
+        console.log(json.data);
+        if (json.status === 202) {
+          console.log("loguserFailure");
+          dispatch(loguserFailure(json.status));
+        } else {
+          let login = {
+            code: json.data.success.code,
+            token: json.data.success.token,
+            username: username,
+          };
+          dispatch(loguserSuccess(login));
+          localStorage.setItem("token", login.token);
+          axios
+            .get(
+              // fetch email from username
+              const_apiurl +
+                `users?sortfield=t.rowid&sortorder=ASC&sqlfilters=t.login:=:'${username}'` +
+                "&DOLAPIKEY=" +
+                login.token
+            )
+            .then((json) => {
+              console.log("fetchEmailSuccess : ");
+              const email = json.data[0].email;
+              localStorage.setItem("userEmail", email);
+              axios
+                .get(
+                  // fetch userId from email
+                  const_apiurl +
+                    "thirdparties/email/" +
+                    email +
+                    "?DOLAPIKEY=" +
+                    login.token
+                )
+                .then((json) => {
+                  console.log("fetchEmailSuccess : ");
+                  localStorage.setItem("userId", json.data.id);
+                });
+            })
+            .catch((error) => {
+              console.log("Catched Error in the GET users Request: ", error);
+              dispatch(loguserFailure(error.status));
+            });
+          return "";
+          // }
+        }
       })
       .catch((error) => {
-        console.log("loguserFailure");
+        console.log("loguserWrongLogin");
         if (error.response) {
-          dispatch(loguserFailure(error));
+          dispatch(loguserWrongLogin(error));
         } else {
-          dispatch(loguserFailure(error));
+          dispatch(loguserWrongLogin(error));
         }
       });
   };
@@ -70,6 +78,7 @@ export function loguser(username, password) {
 export const LOG_USER_BEGIN = "LOG_USER_BEGIN";
 export const LOG_USER_SUCCESS = "LOG_USER_SUCCESS";
 export const LOG_USER_FAILURE = "LOG_USER_FAILURE";
+export const LOG_USER_WRONG_LOGIN = "LOG_USER_WRONG_LOGIN";
 
 export const loguserBegin = () => ({
   type: LOG_USER_BEGIN,
@@ -82,6 +91,10 @@ export const loguserSuccess = (user) => ({
 
 export const loguserFailure = (error) => ({
   type: LOG_USER_FAILURE,
+  payload: { error },
+});
+export const loguserWrongLogin = (error) => ({
+  type: LOG_USER_WRONG_LOGIN,
   payload: { error },
 });
 
