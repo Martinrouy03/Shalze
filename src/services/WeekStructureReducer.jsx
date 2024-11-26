@@ -1,39 +1,129 @@
 import {
-  INIT_WEEKSTRUCTURE_BEGIN,
-  INIT_WEEKSTRUCTURE_SUCCESS,
-  INIT_WEEKSTRUCTURE_FAILURE,
+  INIT_DATE_BEGIN,
+  INIT_DATE_SUCCESS,
+  INIT_DATE_FAILURE,
+  PREVIOUS_MONTH_BEGIN,
+  PREVIOUS_MONTH_SUCCESS,
+  NEXT_MONTH_BEGIN,
+  NEXT_MONTH_SUCCESS,
+  PREVIOUS_WEEK_BEGIN,
+  PREVIOUS_WEEK_SUCCESS,
+  NEXT_WEEK_BEGIN,
+  NEXT_WEEK_SUCCESS,
+  PREVIOUS_MONTH_LAST_WEEK_BEGIN,
+  PREVIOUS_MONTH_LAST_WEEK_SUCCESS,
   UPDATE_WEEKSTRUCTURE_BEGIN,
   UPDATE_WEEKSTRUCTURE_SUCCESS,
   UPDATE_WEEKSTRUCTURE_FAILURE,
 } from "./WeekStructureActions";
 
 const initialState = {
-  month: "",
-  week: "",
-  weekStructure: null,
+  selectedWeek: {
+    weekStartAbsolute: null,
+    weekStart: null,
+    weekEnd: null,
+    nbWeeksSinceMonthStart: 0,
+    nbWeeksBeforeMonthEnd: null,
+    monthStart: null,
+    monthEnd: null,
+    month: null,
+    year: null,
+    monthCounter: 0,
+  },
+  weekStructure: {
+    breakfast: Array(7).fill({
+      regime: "",
+      booked: 0,
+      disabled: 0,
+    }),
+    lunch: Array(7).fill({
+      regime: "",
+      booked: 0,
+      disabled: 0,
+    }),
+    dinner: Array(7).fill({
+      regime: "",
+      booked: 0,
+      disabled: 0,
+    }),
+  },
   error: null,
 };
 
 export default function WeekStructureReducer(state = initialState, action) {
   switch (action.type) {
-    // *** Update week contents
-    case INIT_WEEKSTRUCTURE_BEGIN:
+    //Initialize week contents
+    case INIT_DATE_BEGIN:
       return {
         ...state,
         error: null,
       };
 
-    case INIT_WEEKSTRUCTURE_SUCCESS:
+    case INIT_DATE_SUCCESS:
       return {
         ...state,
-        weekStructure: action.payload.initWeekStructure,
+        selectedWeek: action.payload.selectedWeek,
       };
 
-    case INIT_WEEKSTRUCTURE_FAILURE:
+    case INIT_DATE_FAILURE:
       return {
         ...state,
         error: action.payload.error,
       };
+
+    // Date navigation:
+    case PREVIOUS_MONTH_BEGIN:
+      return {
+        ...state,
+        error: null,
+      };
+    case PREVIOUS_MONTH_SUCCESS:
+      return {
+        ...state,
+        selectedWeek: action.payload.update,
+      };
+    case NEXT_MONTH_BEGIN:
+      return {
+        ...state,
+        error: null,
+      };
+    case NEXT_MONTH_SUCCESS:
+      return {
+        ...state,
+        selectedWeek: action.payload.update,
+      };
+    case PREVIOUS_WEEK_BEGIN:
+      return {
+        ...state,
+        error: null,
+      };
+    case PREVIOUS_WEEK_SUCCESS:
+      return {
+        ...state,
+        selectedWeek: action.payload.update,
+      };
+
+    case NEXT_WEEK_BEGIN:
+      return {
+        ...state,
+        error: null,
+      };
+    case NEXT_WEEK_SUCCESS:
+      return {
+        ...state,
+        selectedWeek: action.payload.update,
+      };
+    case PREVIOUS_MONTH_LAST_WEEK_BEGIN:
+      return {
+        ...state,
+        error: null,
+      };
+    case PREVIOUS_MONTH_LAST_WEEK_SUCCESS:
+      return {
+        ...state,
+        selectedWeek: action.payload.update,
+      };
+    // *** Update week contents
     case UPDATE_WEEKSTRUCTURE_BEGIN:
       return {
         ...state,
@@ -43,7 +133,7 @@ export default function WeekStructureReducer(state = initialState, action) {
     case UPDATE_WEEKSTRUCTURE_SUCCESS:
       return {
         ...state,
-        weekStructure: action.payload.weekStructure,
+        weekStructure: action.payload.update,
       };
 
     case UPDATE_WEEKSTRUCTURE_FAILURE:

@@ -40,7 +40,7 @@ export default function DisplayRegimes({ lang }) {
 
             return (
               <FormControlLabel
-                index={index}
+                key={index}
                 value={regimeReducer.rowid}
                 control={
                   <Radio

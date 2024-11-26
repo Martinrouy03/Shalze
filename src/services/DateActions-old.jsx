@@ -82,12 +82,12 @@ export function getDateValue() {
 
 // Sélection de la semaine précédente du mois en cours:
 export function previousWeek() {
+  const dateReducer = store.getState().dateReducer;
+  const updateWeek = { ...dateReducer.selectedWeek };
+  const updateMonth = { ...dateReducer.selectedMonth };
   return (dispatch) => {
     dispatch(previousWeekBegin());
     console.log("previousWeek Begin!");
-    const dateReducer = store.getState().dateReducer;
-    const updateWeek = { ...dateReducer.selectedWeek };
-    const updateMonth = { ...dateReducer.selectedMonth };
     updateWeek.weekStart = setUnixDate(updateWeek.weekStart, -7);
     updateWeek.weekEnd = setUnixDate(updateWeek.weekEnd, -7);
     updateMonth.nbWeeksBeforeMonthEnd += 1;
@@ -115,12 +115,12 @@ export const previousWeekSuccess = (update) => ({
 // Sélection de la semaine suivante
 
 export function nextWeek() {
+  const dateReducer = store.getState().dateReducer;
+  const updateWeek = { ...dateReducer.selectedWeek };
+  const updateMonth = { ...dateReducer.selectedMonth };
   return (dispatch) => {
     dispatch(nextWeekBegin());
     console.log("nextWeekBegin!");
-    const dateReducer = store.getState().dateReducer;
-    const updateWeek = { ...dateReducer.selectedWeek };
-    const updateMonth = { ...dateReducer.selectedMonth };
     updateWeek.week += 1;
     updateWeek.weekStart = setUnixDate(updateWeek.weekStart, 7);
     updateWeek.weekEnd = setUnixDate(updateWeek.weekEnd, 7);
@@ -149,13 +149,13 @@ export const nextWeekSuccess = (update) => ({
 
 // Sélection du mois précédent, dans le cas où les mois précédent n'est pas le mois courant:
 export function previousMonthLastWeek() {
+  const dateReducer = store.getState().dateReducer;
+  const updateWeek = { ...dateReducer.selectedWeek };
+  const updateMonth = { ...dateReducer.selectedMonth };
+  const currentMonth = { ...dateReducer.currentMonth };
   return (dispatch) => {
     dispatch(previousMonthLastWeekBegin());
     console.log("previousMonthLastWeekBegin !!");
-    const dateReducer = store.getState().dateReducer;
-    const updateWeek = { ...dateReducer.selectedWeek };
-    const updateMonth = { ...dateReducer.selectedMonth };
-    const currentMonth = { ...dateReducer.currentMonth };
     if (updateWeek.weekStart === updateMonth.monthStart) {
       updateWeek.weekStart = setUnixDate(updateWeek.weekStart, -7);
       updateWeek.weekEnd = setUnixDate(updateWeek.weekEnd, -7);

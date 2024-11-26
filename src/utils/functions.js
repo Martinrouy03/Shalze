@@ -26,15 +26,12 @@ export const convertUnixToMonth = (unixDate) => {
 };
 
 export const setUnixDate = (unixDate, shift) => {
-  // console.log(shift);
   const date = convertUnixToDate(unixDate);
-  // console.log("date before: ", date);
+
   const monthDay = date.getDate();
-  // console.log("date: ", date);
-  // console.log("monthDay + shift: ", monthDay + shift);
+
   date.setDate(monthDay + shift);
-  // console.log(date);
-  // console.log("date after: ", date);
+
   return convertDateToUnix(date);
 };
 
@@ -49,13 +46,38 @@ export function computeNbWeeksBeforeMonthEnd(weekStart, monthEnd) {
   const start = convertUnixToDay(weekStart);
   const end = convertUnixToDay(monthEnd);
   const nbWeeksBeforeMonthEnd = Math.floor((end - start) / 7);
-  // console.log(start, end, nbWeeksBeforeMonthEnd);
   return nbWeeksBeforeMonthEnd;
 }
 export function computeNbWeeksSinceMonthStart(weekEnd, monthStart) {
   const end = convertUnixToDay(weekEnd);
   const start = convertUnixToDay(monthStart);
   const nbWeeksBeforeMonthEnd = Math.floor((end - start) / 7);
-  // console.log(start, end, nbWeeksBeforeMonthEnd);
   return nbWeeksBeforeMonthEnd;
+}
+
+export function disabledMeal(weekStart, i, monthStart, monthEnd, deadline) {
+  let output = null;
+  const newDate = new Date(weekStart);
+  const day_i = new Date(
+    new Date(newDate.setDate(weekStart.getDate() + i)).setHours(0, 0, 0, 0)
+  );
+  if (
+    // Si le jour considéré est compris entre aujourd'hui et la fin du mois
+    day_i >= monthStart &&
+    day_i <= monthEnd
+  ) {
+    if (
+      // si le jour considéré est la date d'aujourdhui et la deadline est passée
+      day_i === new Date(new Date().setHours(0, 0, 0, 0)) &&
+      new Date().getHours() > deadline
+    ) {
+      output = 1; // alors le repas est indisponible à la réservation
+    } else {
+      output = 0; // Autrement le repas est disponible
+    }
+  } else {
+    // sinon, les repas sont indisponibles à la réservation
+    output = 1;
+  }
+  return output;
 }

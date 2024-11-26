@@ -1,44 +1,47 @@
 import { store } from "../app/App";
+import { useSelector } from "react-redux";
 import { convertUnixToDate } from "../utils/functions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const DisplayWeekDates = ({ lang, place }) => {
+  const dinner = useSelector(
+    (state) => state.weekStructureReducer.weekStructure.dinner
+  );
   const config = store.getState().configurationReducer.configuration;
-  const dateReducer = store.getState().dateReducer;
-  const weekStart = convertUnixToDate(dateReducer.selectedWeek.weekStart);
-  const monthDay = weekStart.getDate();
+  const weekStart = convertUnixToDate(
+    store.getState().weekStructureReducer.selectedWeek.weekStart
+  );
+  let weekNames = [<div key={"start"}></div>];
+  let weekDates = [
+    <div id="placeLabel" key={"start"}>
+      <h2>{place.label}</h2>
+      <FontAwesomeIcon
+        id="chevron"
+        onClick={() => {
+          //   handleFolding(indexPlace, isUnFolded);
+        }}
+        icon="fa-solid fa-chevron-down"
+        size="xl"
+      />
+    </div>,
+  ];
+  for (let i = 0; i < 7; i++) {
+    const newDate = new Date(weekStart);
+    weekNames.push(
+      <div key={i} style={{ color: dinner[i].disabled ? "grey" : "black" }}>
+        {config.language[lang].weekDay[i]}
+      </div>
+    );
+    weekDates.push(
+      <div key={i} style={{ color: dinner[i].disabled ? "grey" : "black" }}>
+        {new Date(newDate.setDate(weekStart.getDate() + i)).getDate()}
+      </div>
+    );
+  }
   return (
     <>
-      <div>
-        <div></div>
-        <div>{config.language[lang].weekDay[0]}</div>
-        <div>{config.language[lang].weekDay[1]}</div>
-        <div>{config.language[lang].weekDay[2]}</div>
-        <div>{config.language[lang].weekDay[3]}</div>
-        <div>{config.language[lang].weekDay[4]}</div>
-        <div>{config.language[lang].weekDay[5]}</div>
-        <div>{config.language[lang].weekDay[6]}</div>
-      </div>
-      <div>
-        <div id="placeLabel">
-          <h2>{place.label}</h2>
-          <FontAwesomeIcon
-            id="chevron"
-            onClick={() => {
-              //   handleFolding(indexPlace, isUnFolded);
-            }}
-            icon="fa-solid fa-chevron-down"
-            size="xl"
-          />
-        </div>
-        <div>{new Date(weekStart.setDate(monthDay)).getDate()}</div>
-        <div>{new Date(weekStart.setDate(monthDay + 1)).getDate()}</div>
-        <div>{new Date(weekStart.setDate(monthDay + 2)).getDate()}</div>
-        <div>{new Date(weekStart.setDate(monthDay + 3)).getDate()}</div>
-        <div>{new Date(weekStart.setDate(monthDay + 4)).getDate()}</div>
-        <div>{new Date(weekStart.setDate(monthDay + 5)).getDate()}</div>
-        <div>{new Date(weekStart.setDate(monthDay + 6)).getDate()}</div>
-      </div>
+      <div>{weekNames}</div>
+      <div>{weekDates}</div>
     </>
   );
 };

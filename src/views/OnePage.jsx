@@ -10,13 +10,13 @@ import DisplayWeek from "./DisplayWeek";
 import DisplayRegimes from "./DisplayRegimes";
 
 // Import Actions
-import { initDate } from "../services/DateActions";
+import { initDate } from "../services/WeekStructureActions";
 import { getOrder } from "../services/OrderActions";
 import { getPlaces } from "../services/PlacesActions";
 import { getRegimes } from "../services/RegimesActions";
 import { getConfiguration } from "../services/ConfigurationActions";
 import {
-  initWeekStructure,
+  // initWeekStructure,
   updateWeekStructure,
 } from "../services/WeekStructureActions";
 import { convertUnixToDate } from "../utils/functions";
@@ -40,21 +40,17 @@ const OnePage = () => {
     (state) => state.configurationReducer.configuration
   );
   const orderReducer = useSelector((state) => state.orderReducer.order);
-  const weekStructure = useSelector(
-    (state) => state.weekStructureReducer.weekStructure
-  );
-  const dateReducer = useSelector((state) => state.dateReducer);
+  const weekReducer = useSelector((state) => state.weekStructureReducer);
   const modalClose = useSelector((state) => state.loginReducer.modalClose);
   const loginReducer = useSelector((state) => state.loginReducer);
-  const places = useSelector((state) => state.placesReducer.places);
+  // const places = useSelector((state) => state.placesReducer.places);
   // const regimesReducer = useSelector((state) => state.regimesReducer);
-  let monthEnd = convertUnixToDate(dateReducer.selectedMonth.monthEnd);
-  monthEnd = monthEnd.toLocaleDateString();
+  // monthEnd = monthEnd.toLocaleDateString();
   useEffect(() => {
     dispatch(getConfiguration());
+    dispatch(initDate());
     token && dispatch(getPlaces(token));
     token && dispatch(getRegimes(token));
-    dispatch(initDate());
   }, []);
 
   useEffect(() => {
@@ -62,21 +58,8 @@ const OnePage = () => {
   }, [token, modalClose, loginReducer, config]);
 
   useEffect(() => {
-    places[0] && dispatch(initWeekStructure());
-  }, [places]);
-
-  useEffect(() => {
-    orderReducer.order &&
-      weekStructure &&
-      config.codeRepas &&
-      dispatch(
-        updateWeekStructure(
-          orderReducer.order,
-          weekStructure,
-          config.codeRepas.code
-        )
-      );
-  }, [weekStructure, dateReducer]);
+    config.codeRepas && dispatch(updateWeekStructure());
+  }, [weekReducer.selectedWeek]);
 
   return (
     <div>
@@ -99,15 +82,15 @@ const OnePage = () => {
       </div>
       <div className="center">
         {config.language && <DisplayRegimes lang={lang} />}
-        {dateReducer.todayDate && <SelectWeek lang={lang} />}
+        {weekReducer.selectedWeek && <SelectWeek lang={lang} />}
       </div>
       <div className="centerColumn">
-        <DisplayWeek lang={lang} />
+        {weekReducer.weekStructure && <DisplayWeek lang={lang} />}
         {/* <h2>Current Month</h2>
         <h3>Max Weeks: {dateReducer.currentMonth.maxWeek}</h3>
         <h3>Mois: {dateReducer.currentMonth.month}</h3> */}
       </div>
-      <div className="centerColumn">
+      {/* <div className="centerColumn">
         <h2>Selected Week</h2>
 
         <h3>
@@ -130,7 +113,7 @@ const OnePage = () => {
       <div className="centerColumn">
         <h2>Dernier du mois</h2>
         <h3>{monthEnd}</h3>
-      </div>
+      </div> */}
     </div>
   );
 };

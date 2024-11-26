@@ -5,14 +5,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { updateIsUnFolded } from "../services/PlacesActions";
 const DisplayWeek = ({ lang }) => {
   const dispatch = useDispatch();
-  const placesList = store.getState().placesReducer.places;
-  const isUnFolded = store.getState().placesReducer.isUnFolded;
+  const placesList = useSelector((state) => state.placesReducer.places);
+  const isUnFolded = useSelector((state) => state.placesReducer.isUnFolded);
   return (
     <div className="tables">
       {/* {!loading ? ( */}
       {placesList.map((place, index) => {
         return isUnFolded[index] ? (
-          <div index={index} className="table">
+          <div key={index} className="table">
             <div className="table">
               <div className="line">
                 <div
