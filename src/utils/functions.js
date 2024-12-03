@@ -61,23 +61,49 @@ export function disabledMeal(weekStart, i, monthStart, monthEnd, deadline) {
   const day_i = new Date(
     new Date(newDate.setDate(weekStart.getDate() + i)).setHours(0, 0, 0, 0)
   );
-  if (
-    // Si le jour considéré est compris entre aujourd'hui et la fin du mois
-    day_i >= monthStart &&
-    day_i <= monthEnd
-  ) {
+  // console.log(monthStart.getMonth(), new Date().getMonth());
+  if (monthStart.getMonth() === new Date().getMonth()) {
     if (
-      // si le jour considéré est la date d'aujourdhui et la deadline est passée
-      day_i === new Date(new Date().setHours(0, 0, 0, 0)) &&
-      new Date().getHours() > deadline
+      // Si le jour considéré est compris entre aujourd'hui et la fin du mois
+      day_i >= new Date(new Date().setHours(0, 0, 0, 0)) &&
+      day_i <= monthEnd
     ) {
-      output = 1; // alors le repas est indisponible à la réservation
+      if (
+        // si le jour considéré est la date d'aujourdhui et la deadline est passée
+        day_i.toDateString() ===
+          new Date(new Date().setHours(0, 0, 0, 0)).toDateString() &&
+        new Date().getHours() >= deadline
+      ) {
+        output = 1; // alors le repas est indisponible à la réservation
+      } else {
+        output = 0; // Autrement le repas est disponible
+      }
     } else {
-      output = 0; // Autrement le repas est disponible
+      // sinon, les repas sont indisponibles à la réservation
+      output = 1;
     }
   } else {
-    // sinon, les repas sont indisponibles à la réservation
-    output = 1;
+    if (
+      // Si le jour considéré est compris entre aujourd'hui et la fin du mois
+      day_i >= monthStart &&
+      day_i <= monthEnd
+    ) {
+      output = 0; //repas est disponible
+    } else output = 1; // repas sont indisponibles à la réservation
   }
   return output;
 }
+
+export const isMealLineFull = (mealLine) => {
+  let bookedCount = 0;
+  let enabledCount = 0;
+  mealLine.map((meal) => {
+    if (!meal.disabled) {
+      enabledCount += 1;
+      if (meal.booked) {
+        bookedCount += 1;
+      }
+    }
+  });
+  return bookedCount === enabledCount && enabledCount > 0;
+};

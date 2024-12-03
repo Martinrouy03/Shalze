@@ -59,9 +59,56 @@ export const initDateSuccess = (selectedWeek) => ({
   type: INIT_DATE_SUCCESS,
   payload: { selectedWeek },
 });
-export const initDateFailure = (error) => ({
-  type: INIT_DATE_FAILURE,
-  payload: { error },
+
+export function initWeekStructure() {
+  return (dispatch) => {
+    console.log("initWeekStructureBegin ");
+    dispatch(initWeekStructureBegin());
+    const places = store.getState().placesReducer.places;
+
+    const weekStructure = places.map((place, index) => {
+      return {
+        rowId: place.rowid,
+        label: place.label,
+        isUnfolded: 1,
+        mealLines: [
+          Array(7).fill({
+            meal: "breakfast",
+            regimeColor: "",
+            booked: 0,
+            disabled: 0,
+          }),
+
+          Array(7).fill({
+            meal: "lunch",
+            regimeColor: "",
+            booked: 0,
+            disabled: 0,
+          }),
+          Array(7).fill({
+            meal: "dinner",
+            regimeColor: "",
+            booked: 0,
+            disabled: 0,
+          }),
+        ],
+      };
+    });
+    dispatch(initWeekStructureSuccess(weekStructure));
+    console.log("initWeekStructureSuccess!");
+  };
+}
+
+export const INIT_WEEKSTRUCTURE_BEGIN = "INIT_WEEKSTRUCTURE_BEGIN";
+export const INIT_WEEKSTRUCTURE_SUCCESS = "INIT_WEEKSTRUCTURE_SUCCESS";
+export const INIT_WEEKSTRUCTURE_FAILURE = "INIT_WEEKSTRUCTURE_FAILURE";
+
+export const initWeekStructureBegin = () => ({
+  type: INIT_WEEKSTRUCTURE_BEGIN,
+});
+export const initWeekStructureSuccess = (weekStructure) => ({
+  type: INIT_WEEKSTRUCTURE_SUCCESS,
+  payload: { weekStructure },
 });
 
 // Sélection du mois précédent:
@@ -89,7 +136,7 @@ export function previousMonth() {
     if (updateWeek.month === new Date().getMonth()) {
       updateWeek.weekStart = updateWeek.weekStartAbsolute;
       updateWeek.weekEnd = setUnixDate(updateWeek.weekStartAbsolute, 6);
-      updateWeek.monthStart = new Date().getDate();
+      updateWeek.monthStart = convertDateToUnix(new Date()); //new Date().getDate()
       updateWeek.nbWeeksBeforeMonthEnd = computeNbWeeksBeforeMonthEnd(
         updateWeek.weekStartAbsolute,
         updateWeek.monthEnd
@@ -114,6 +161,26 @@ export function previousMonth() {
     console.log("Previous Month Success !");
   };
 }
+
+export function updateRegime(regimeId) {
+  return (dispatch) => {
+    dispatch(updateRegimeBegin());
+    console.log("updateRegime Begin!");
+    console.log("regimeID: ", regimeId);
+    dispatch(updateRegimeSuccess(regimeId));
+    console.log("updateRegime Success!");
+  };
+}
+
+export const UPDATE_REGIME_BEGIN = "UPDATE_REGIME_BEGIN";
+export const UPDATE_REGIME_SUCCESS = "UPDATE_REGIME_SUCCESS";
+export const updateRegimeBegin = () => ({
+  type: UPDATE_REGIME_BEGIN,
+});
+export const updateRegimeSuccess = (regimeId) => ({
+  type: UPDATE_REGIME_SUCCESS,
+  payload: { regimeId },
+});
 
 export const PREVIOUS_MONTH_BEGIN = "PREVIOUS_MONTH_BEGIN";
 export const PREVIOUS_MONTH_SUCCESS = "PREVIOUS_MONTH_SUCCESS";
@@ -276,44 +343,46 @@ export const previousMonthLastWeekSuccess = (update) => ({
   type: PREVIOUS_MONTH_LAST_WEEK_SUCCESS,
   payload: { update },
 });
+
 export function updateWeekStructure() {
   const config = store.getState().configurationReducer.configuration;
   const selectedWeek = JSON.parse(
     JSON.stringify(store.getState().weekStructureReducer.selectedWeek)
   );
-  const weekStructure = JSON.parse(
+  const weekStructures = JSON.parse(
     JSON.stringify(store.getState().weekStructureReducer.weekStructure)
   );
 
   return (dispatch) => {
     console.log("update WeekStructure Begin");
-    console.log(convertUnixToDate(selectedWeek.monthStart));
     dispatch(updateWeekStructureBegin());
-    for (let i = 0; i < 7; i++) {
-      weekStructure.breakfast[i].disabled = disabledMeal(
-        convertUnixToDate(selectedWeek.weekStart),
-        i,
-        convertUnixToDate(selectedWeek.monthStart),
-        convertUnixToDate(selectedWeek.monthEnd),
-        config.deadline.breakfast
-      );
-      weekStructure.lunch[i].disabled = disabledMeal(
-        convertUnixToDate(selectedWeek.weekStart),
-        i,
-        convertUnixToDate(selectedWeek.monthStart),
-        convertUnixToDate(selectedWeek.monthEnd),
-        config.deadline.lunch
-      );
-      weekStructure.dinner[i].disabled = disabledMeal(
-        convertUnixToDate(selectedWeek.weekStart),
-        i,
-        convertUnixToDate(selectedWeek.monthStart),
-        convertUnixToDate(selectedWeek.monthEnd),
-        config.deadline.lunch
-      );
-    }
-    console.log(weekStructure);
-    dispatch(updateWeekStructureSuccess(weekStructure));
+    weekStructures.map((weekStructure, index) => {
+      for (let i = 0; i < 7; i++) {
+        weekStructure.mealLines[0][i].disabled = disabledMeal(
+          convertUnixToDate(selectedWeek.weekStart),
+          i,
+          convertUnixToDate(selectedWeek.monthStart),
+          convertUnixToDate(selectedWeek.monthEnd),
+          config.deadline.breakfast
+        );
+        weekStructure.mealLines[1][i].disabled = disabledMeal(
+          convertUnixToDate(selectedWeek.weekStart),
+          i,
+          convertUnixToDate(selectedWeek.monthStart),
+          convertUnixToDate(selectedWeek.monthEnd),
+          config.deadline.lunch
+        );
+        weekStructure.mealLines[2][i].disabled = disabledMeal(
+          convertUnixToDate(selectedWeek.weekStart),
+          i,
+          convertUnixToDate(selectedWeek.monthStart),
+          convertUnixToDate(selectedWeek.monthEnd),
+          config.deadline.dinner
+        );
+      }
+      return weekStructure;
+    });
+    dispatch(updateWeekStructureSuccess(weekStructures));
     console.log("updateWeekStructureSuccess !");
   };
 }
@@ -331,5 +400,38 @@ export const updateWeekStructureSuccess = (update) => ({
 });
 export const updateWeekStructureFailure = (error) => ({
   type: UPDATE_WEEKSTRUCTURE_FAILURE,
+  payload: { error },
+});
+
+export function updateFolding(rowId) {
+  const weekStructures = JSON.parse(
+    JSON.stringify(store.getState().weekStructureReducer.weekStructure)
+  );
+  return (dispatch) => {
+    console.log("update Folding Begin");
+    dispatch(updateFoldingBegin());
+    weekStructures.map((weekStructure) => {
+      if (weekStructure.rowId === rowId) {
+        weekStructure.isUnfolded = !weekStructure.isUnfolded;
+      }
+    });
+    dispatch(updateFoldingSuccess(weekStructures));
+    console.log("updatFoldingSuccess !");
+  };
+}
+
+export const UPDATE_FOLDING_BEGIN = "UPDATE_FOLDING_BEGIN";
+export const UPDATE_FOLDING_SUCCESS = "UPDATE_FOLDING_SUCCESS";
+export const UPDATE_FOLDING_FAILURE = "UPDATE_FOLDING_FAILURE";
+
+export const updateFoldingBegin = () => ({
+  type: UPDATE_FOLDING_BEGIN,
+});
+export const updateFoldingSuccess = (update) => ({
+  type: UPDATE_FOLDING_SUCCESS,
+  payload: { update },
+});
+export const updateFoldingFailure = (error) => ({
+  type: UPDATE_FOLDING_FAILURE,
   payload: { error },
 });

@@ -10,13 +10,13 @@ import DisplayWeek from "./DisplayWeek";
 import DisplayRegimes from "./DisplayRegimes";
 
 // Import Actions
-import { initDate } from "../services/WeekStructureActions";
 import { getOrder } from "../services/OrderActions";
 import { getPlaces } from "../services/PlacesActions";
 import { getRegimes } from "../services/RegimesActions";
 import { getConfiguration } from "../services/ConfigurationActions";
 import {
-  // initWeekStructure,
+  initDate,
+  initWeekStructure,
   updateWeekStructure,
 } from "../services/WeekStructureActions";
 import { convertUnixToDate } from "../utils/functions";
@@ -43,24 +43,28 @@ const OnePage = () => {
   const weekReducer = useSelector((state) => state.weekStructureReducer);
   const modalClose = useSelector((state) => state.loginReducer.modalClose);
   const loginReducer = useSelector((state) => state.loginReducer);
-  // const places = useSelector((state) => state.placesReducer.places);
-  // const regimesReducer = useSelector((state) => state.regimesReducer);
+  const places = useSelector((state) => state.placesReducer.places);
+  const regimesReducer = useSelector((state) => state.regimesReducer);
   // monthEnd = monthEnd.toLocaleDateString();
   useEffect(() => {
     dispatch(getConfiguration());
     dispatch(initDate());
-    token && dispatch(getPlaces(token));
-    token && dispatch(getRegimes(token));
+    dispatch(getPlaces(token));
+    dispatch(getRegimes(token));
   }, []);
-
   useEffect(() => {
-    token && config.codeRepas && dispatch(getOrder(userId, token));
+    places[0] && dispatch(initWeekStructure());
+    config.codeRepas &&
+      weekReducer.weekStructure &&
+      dispatch(updateWeekStructure()); // TODO: check enchainement crado
+  }, [places, config]);
+  useEffect(() => {
+    config.codeRepas && dispatch(getOrder(userId, token));
   }, [token, modalClose, loginReducer, config]);
 
   useEffect(() => {
     config.codeRepas && dispatch(updateWeekStructure());
   }, [weekReducer.selectedWeek]);
-
   return (
     <div>
       <Header lang={lang} setLang={setLang} initLang={initLang} token={token} />
@@ -85,7 +89,9 @@ const OnePage = () => {
         {weekReducer.selectedWeek && <SelectWeek lang={lang} />}
       </div>
       <div className="centerColumn">
-        {weekReducer.weekStructure && <DisplayWeek lang={lang} />}
+        {weekReducer.weekStructure && weekReducer.selectedWeek && (
+          <DisplayWeek lang={lang} />
+        )}
         {/* <h2>Current Month</h2>
         <h3>Max Weeks: {dateReducer.currentMonth.maxWeek}</h3>
         <h3>Mois: {dateReducer.currentMonth.month}</h3> */}

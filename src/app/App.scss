@@ -125,32 +125,30 @@ form {
   justify-content: center;
   gap: 20px;
 }
-// .line {
-//   width: 100%;
-//   display: flex;
-//   align-items: center;
-//   gap: 10px;
-// }
+.line {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.line:last-of-type {
+  > div {
+    border-radius: 0 0 10px 10px;
+  }
+}
 .left-div {
   padding: 10px 0px;
   background-color: #f2f2f2;
-  // width: 90%;
   margin-left: 50px;
-
-  > div {
-    display: flex;
-    text-align: center;
-    > div:first-child {
-      width: 200px;
-    }
-    > div:not(:first-child) {
-      flex: 1;
-      width: 85px;
-    }
-    gap: 10px;
+  display: flex;
+  text-align: center;
+  > div:first-child {
+    width: 200px;
   }
-}
-.table:last-child() {
-  border-radius: 0 0 10px 10px;
+  > div:not(:first-child) {
+    flex: 1;
+    width: 85px;
+  }
+  gap: 10px;
 }

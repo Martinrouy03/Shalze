@@ -2,8 +2,8 @@ import {
   GET_REGIMES_BEGIN,
   GET_REGIMES_FAILURE,
   GET_REGIMES_SUCCESS,
-  UPDATE_REGIME_BEGIN,
-  UPDATE_REGIME_SUCCESS,
+  // UPDATE_REGIME_BEGIN,
+  // UPDATE_REGIME_SUCCESS,
 } from "./RegimesActions";
 
 const initialState = [];
@@ -15,7 +15,7 @@ export default function RegimesReducer(state = initialState, action) {
       return {
         ...state,
         list: [],
-        selected: "4",
+        // selected: "4",
         loading: true,
         error: null,
       };
@@ -32,15 +32,6 @@ export default function RegimesReducer(state = initialState, action) {
         ...state,
         loading: false,
         error: action.payload.error,
-      };
-    case UPDATE_REGIME_BEGIN:
-      return {
-        ...state,
-      };
-    case UPDATE_REGIME_SUCCESS:
-      return {
-        ...state,
-        selected: action.payload.regimeId,
       };
 
     default:

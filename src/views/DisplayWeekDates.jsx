@@ -1,34 +1,64 @@
-import { store } from "../app/App";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { convertUnixToDate } from "../utils/functions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import { updateFolding } from "../services/WeekStructureActions";
 const DisplayWeekDates = ({ lang, place }) => {
-  const dinner = useSelector(
-    (state) => state.weekStructureReducer.weekStructure.dinner
+  const dispatch = useDispatch();
+  // console.log(place.mealLines[0]);
+  const dinner = place.mealLines.find(
+    (mealLine) => mealLine[0].meal === "dinner"
   );
-  const config = store.getState().configurationReducer.configuration;
+  const config = useSelector(
+    (state) => state.configurationReducer.configuration
+  );
   const weekStart = convertUnixToDate(
-    store.getState().weekStructureReducer.selectedWeek.weekStart
+    useSelector((state) => state.weekStructureReducer.selectedWeek.weekStart)
   );
   let weekNames = [<div key={"start"}></div>];
   let weekDates = [
     <div id="placeLabel" key={"start"}>
-      <h2>{place.label}</h2>
-      <FontAwesomeIcon
-        id="chevron"
-        onClick={() => {
-          //   handleFolding(indexPlace, isUnFolded);
+      <h2
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start",
         }}
-        icon="fa-solid fa-chevron-down"
-        size="xl"
-      />
+      >
+        {place.label}
+      </h2>
+      {place.isUnfolded ? (
+        <FontAwesomeIcon
+          id="chevron"
+          onClick={() => {
+            dispatch(updateFolding(place.rowId));
+          }}
+          icon="fa-solid fa-chevron-down"
+          size="lg"
+        />
+      ) : (
+        <FontAwesomeIcon
+          id="chevron"
+          onClick={() => {
+            dispatch(updateFolding(place.rowId));
+          }}
+          icon="fa-solid fa-chevron-right"
+          size="lg"
+        />
+      )}
     </div>,
   ];
   for (let i = 0; i < 7; i++) {
     const newDate = new Date(weekStart);
     weekNames.push(
-      <div key={i} style={{ color: dinner[i].disabled ? "grey" : "black" }}>
+      <div
+        key={i}
+        style={{
+          color: dinner[i].disabled ? "grey" : "black",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+        }}
+      >
         {config.language[lang].weekDay[i]}
       </div>
     );
@@ -40,8 +70,29 @@ const DisplayWeekDates = ({ lang, place }) => {
   }
   return (
     <>
-      <div>{weekNames}</div>
-      <div>{weekDates}</div>
+      <div className="line">
+        <div
+          className="left-div"
+          style={{
+            borderRadius: "10px 10px 0 0",
+            height: "30px",
+            padding: "0px",
+          }}
+        >
+          {weekNames}
+        </div>
+      </div>
+      <div className="line">
+        <div
+          className="left-div"
+          style={{
+            padding: "0px",
+            height: "30px",
+          }}
+        >
+          {weekDates}
+        </div>
+      </div>
     </>
   );
 };

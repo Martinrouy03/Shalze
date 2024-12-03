@@ -51,22 +51,3 @@ export const getRegimesFailure = (error) => ({
   type: GET_REGIMES_FAILURE,
   payload: { error },
 });
-
-export function updateRegime(regimeId) {
-  return (dispatch) => {
-    dispatch(updateRegimeBegin());
-    console.log("updateRegime Begin!");
-    dispatch(updateRegimeSuccess(regimeId));
-    console.log("updateRegime Success!");
-  };
-}
-
-export const UPDATE_REGIME_BEGIN = "UPDATE_REGIME_BEGIN";
-export const UPDATE_REGIME_SUCCESS = "UPDATE_REGIME_SUCCESS";
-export const updateRegimeBegin = () => ({
-  type: UPDATE_REGIME_BEGIN,
-});
-export const updateRegimeSuccess = (regimeId) => ({
-  type: UPDATE_REGIME_SUCCESS,
-  payload: regimeId,
-});

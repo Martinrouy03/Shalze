@@ -1,28 +1,77 @@
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
-import { store } from "../app/App";
 import DisplayWeekDates from "./DisplayWeekDates";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { updateIsUnFolded } from "../services/PlacesActions";
+import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { isMealLineFull } from "../utils/functions";
+library.add(faCircleXmark);
+
 const DisplayWeek = ({ lang }) => {
   const dispatch = useDispatch();
-  const placesList = useSelector((state) => state.placesReducer.places);
-  const isUnFolded = useSelector((state) => state.placesReducer.isUnFolded);
+  const weekStructures = useSelector(
+    (state) => state.weekStructureReducer.weekStructure
+  );
+  // const regimesConfig = useSelector(
+  //   (state) => state.configurationReducer.configuration.regimes
+  // );
+  // const regimesReducer = useSelector((state) => state.regimesReducer);
+  // const regime = regimesReducer.list.find(
+  //   (regime) => regime.rowid === regimesReducer.selected
+  // );
+
   return (
     <div className="tables">
       {/* {!loading ? ( */}
-      {placesList.map((place, index) => {
-        return isUnFolded[index] ? (
+      {weekStructures.map((weekStructure, index) => {
+        return (
           <div key={index} className="table">
-            <div className="table">
-              <div className="line">
-                <div
-                  className="left-div"
-                  style={{ borderRadius: "10px 10px 0 0" }}
-                >
-                  <DisplayWeekDates lang={lang} place={place} />
-                </div>
-              </div>
-              {/* {ids.map((id) => {
+            <DisplayWeekDates lang={lang} place={weekStructure} />
+            {weekStructure.isUnfolded &&
+              weekStructure.mealLines.map((mealLine, index) => {
+                return (
+                  <div key={index} className="line">
+                    <div className="left-div">
+                      <div key={"start"}></div>
+                      {mealLine.map((mealBox, i) => {
+                        return (
+                          <div key={i}>
+                            <input
+                              type="checkbox"
+                              disabled={mealBox.disabled}
+                              checked={mealBox.booked}
+                              style={{
+                                accentColor: mealBox.regimeColor,
+                              }}
+                              onChange={() => {
+                                // handleCheckBox(shift, id, firstDay);
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {isMealLineFull(mealLine) && (
+                      <FontAwesomeIcon
+                        icon="fa-regular fa-circle-xmark"
+                        size="2xl"
+                        style={{ color: "#ab0032" }}
+                        onClick={() => {
+                          // handleWeekButtons(id, month, week, place, 1);
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+{
+  /* {ids.map((id) => {
                 const adjust = adujstLengthMax(
                   mm,
                   month,
@@ -99,10 +148,10 @@ const DisplayWeek = ({ lang }) => {
                     )}
                   </div>
                 );
-              })} */}
-            </div>
-          </div>
-        ) : (
+              })} 
+        </div>
+      </div>
+      {/* ) : (
           <div id="folded">
             <h2>{place.label}</h2>
             <FontAwesomeIcon
@@ -114,15 +163,15 @@ const DisplayWeek = ({ lang }) => {
               size="xl"
             />
           </div>
-        );
-      })}
-      {/* // ) : (
+        ); */
+}
+
+{
+  /* // ) : (
       //   <div className="center">
       //     {config.language && config.language[lang].loading}
       //   </div>
-      // )} */}
-    </div>
-  );
-};
+      // )} */
+}
 
 export default DisplayWeek;

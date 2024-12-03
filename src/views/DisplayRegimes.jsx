@@ -4,7 +4,7 @@ import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
-import { updateRegime } from "../services/RegimesActions";
+import { updateRegime } from "../services/WeekStructureActions";
 
 export default function DisplayRegimes({ lang }) {
   const dispatch = useDispatch();
@@ -17,14 +17,16 @@ export default function DisplayRegimes({ lang }) {
     (state) => state.regimesReducer,
     shallowEqual
   );
+  const regimeSelected = useSelector(
+    (state) => state.weekStructureReducer.regimeSelected
+  );
   const regimesList = regimesReducer.list;
-  // console.log("default: ", regimesReducer.selected);
   return (
     <FormControl>
       <RadioGroup
         aria-labelledby="radio-buttons"
         name="radio-buttons-group"
-        defaultValue={regimesReducer.selected}
+        defaultValue={regimeSelected}
         onChange={(event) => {
           dispatch(updateRegime(event.target.value));
         }}

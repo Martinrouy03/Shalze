@@ -27,7 +27,7 @@ const SelectWeek = ({ lang }) => {
   return (
     <div>
       <div className="center">
-        {selectedWeek.monthStart > selectedWeek.weekStartAbsolute && (
+        {!(selectedWeek.month === new Date().getMonth()) && (
           <FontAwesomeIcon
             id="chevron"
             onClick={() => {

@@ -1,7 +1,11 @@
 import {
   INIT_DATE_BEGIN,
   INIT_DATE_SUCCESS,
-  INIT_DATE_FAILURE,
+  INIT_WEEKSTRUCTURE_BEGIN,
+  INIT_WEEKSTRUCTURE_SUCCESS,
+  INIT_WEEKSTRUCTURE_FAILURE,
+  UPDATE_REGIME_BEGIN,
+  UPDATE_REGIME_SUCCESS,
   PREVIOUS_MONTH_BEGIN,
   PREVIOUS_MONTH_SUCCESS,
   NEXT_MONTH_BEGIN,
@@ -15,6 +19,8 @@ import {
   UPDATE_WEEKSTRUCTURE_BEGIN,
   UPDATE_WEEKSTRUCTURE_SUCCESS,
   UPDATE_WEEKSTRUCTURE_FAILURE,
+  UPDATE_FOLDING_BEGIN,
+  UPDATE_FOLDING_SUCCESS,
 } from "./WeekStructureActions";
 
 const initialState = {
@@ -30,23 +36,8 @@ const initialState = {
     year: null,
     monthCounter: 0,
   },
-  weekStructure: {
-    breakfast: Array(7).fill({
-      regime: "",
-      booked: 0,
-      disabled: 0,
-    }),
-    lunch: Array(7).fill({
-      regime: "",
-      booked: 0,
-      disabled: 0,
-    }),
-    dinner: Array(7).fill({
-      regime: "",
-      booked: 0,
-      disabled: 0,
-    }),
-  },
+  regimeSelected: "4", // TODO dans fichier de configuration
+  weekStructure: null,
   error: null,
 };
 
@@ -64,13 +55,32 @@ export default function WeekStructureReducer(state = initialState, action) {
         ...state,
         selectedWeek: action.payload.selectedWeek,
       };
+    case INIT_WEEKSTRUCTURE_BEGIN:
+      return {
+        ...state,
+        error: null,
+      };
 
-    case INIT_DATE_FAILURE:
+    case INIT_WEEKSTRUCTURE_SUCCESS:
+      return {
+        ...state,
+        weekStructure: action.payload.weekStructure,
+      };
+    case INIT_WEEKSTRUCTURE_FAILURE:
       return {
         ...state,
         error: action.payload.error,
       };
-
+    // Select Regim:
+    case UPDATE_REGIME_BEGIN:
+      return {
+        ...state,
+      };
+    case UPDATE_REGIME_SUCCESS:
+      return {
+        ...state,
+        regimeSelected: action.payload.regimeId,
+      };
     // Date navigation:
     case PREVIOUS_MONTH_BEGIN:
       return {
@@ -140,6 +150,17 @@ export default function WeekStructureReducer(state = initialState, action) {
       return {
         ...state,
         error: action.payload.error,
+      };
+    case UPDATE_FOLDING_BEGIN:
+      return {
+        ...state,
+        error: null,
+      };
+
+    case UPDATE_FOLDING_SUCCESS:
+      return {
+        ...state,
+        weekStructure: action.payload.update,
       };
     default:
       // ALWAYS have a default case in a reducer
