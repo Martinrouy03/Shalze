@@ -3,7 +3,9 @@ import axios from "axios";
 import moment from "moment";
 import { getConfigurationValue } from "./ConfigurationActions.jsx";
 
-export function getOrder(customerID, token) {
+export function getOrder() {
+  const customerID = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
   // const currentMonth = new Date().getMonth();
   // const month = currentMonth;
   let codeRepas = getConfigurationValue("codeRepas");
@@ -21,12 +23,10 @@ export function getOrder(customerID, token) {
       )
       .then((json) => {
         console.log("getOrderSuccess");
-
         let orders = json.data.filter(
-          (order) =>
-            // Number(order.statut) > 0 &&
-            order.lines.length > 0 //&&
+          (order) => order.lines.length > 0 //&&
         );
+        console.log(orders);
         orders = orders.filter((order) =>
           order.lines.some(
             (line) =>
@@ -35,6 +35,7 @@ export function getOrder(customerID, token) {
                 new Date()
           )
         );
+        console.log(orders);
 
         const commandNb = orders.length;
         // console.log("commandNb: ", commandNb);
@@ -45,6 +46,7 @@ export function getOrder(customerID, token) {
               moment.unix(order.lines[0].array_options.options_lin_datedebut) //
             ).getMonth() === new Date().getMonth()
         );
+        console.log(order);
         // dispatch(getOrderSuccess(order[0]));
         dispatch(
           getOrderSuccess({

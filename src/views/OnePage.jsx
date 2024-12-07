@@ -8,6 +8,7 @@ import LoginModal from "../views/LoginModal";
 import SelectWeek from "./SelectWeek";
 import DisplayWeek from "./DisplayWeek";
 import DisplayRegimes from "./DisplayRegimes";
+import ErrorMessages from "./ErrorMessages";
 
 // Import Actions
 import { getOrder } from "../services/OrderActions";
@@ -22,7 +23,6 @@ import {
 import { convertUnixToDate } from "../utils/functions";
 
 let token = localStorage.getItem("token") || "";
-const userId = localStorage.getItem("userId") || "";
 
 // State instantiations:
 const navLanguage = navigator.language || navigator.userLanguage;
@@ -45,16 +45,16 @@ const OnePage = () => {
   const loginReducer = useSelector((state) => state.loginReducer);
   const places = useSelector((state) => state.placesReducer.places);
   const regimesReducer = useSelector((state) => state.regimesReducer);
-  // monthEnd = monthEnd.toLocaleDateString();
   useEffect(() => {
     dispatch(getConfiguration());
     dispatch(initDate());
     dispatch(getPlaces(token));
     dispatch(getRegimes(token));
   }, []);
+  // console.log("order: ", orderReducer.order);
   useEffect(() => {
-    config.codeRepas && dispatch(getOrder(userId, token));
-  }, [token, modalClose, loginReducer, config]);
+    config.codeRepas && dispatch(getOrder());
+  }, [modalClose, loginReducer, config]);
   useEffect(() => {
     places[0] && dispatch(initWeekStructure());
     places[0] &&
@@ -63,7 +63,7 @@ const OnePage = () => {
       dispatch(
         updateWeekStructure(orderReducer.order.lines, regimesReducer.list)
       );
-  }, [orderReducer.order, regimesReducer.list]);
+  }, [orderReducer.order, regimesReducer.list, places]);
   useEffect(() => {
     config.codeRepas &&
       Object.keys(orderReducer.order).includes("lines") &&
@@ -75,29 +75,17 @@ const OnePage = () => {
   return (
     <div>
       <Header lang={lang} setLang={setLang} initLang={initLang} token={token} />
-
       {!modalClose && config.language && !token && <LoginModal lang={lang} />}
-      <div className="center">
-        {loginReducer.error && loginReducer.error.code === "ERR_NETWORK" && (
-          <h2>{config.language[lang].serverOff}</h2>
-        )}
-        {loginReducer.error && loginReducer.error === 202 && (
-          <h2>{config.language[lang].status202}</h2>
-        )}
-        {loginReducer.error && loginReducer.error === 404 && (
-          <h2>{config.language[lang].userNotFound}</h2>
-        )}
-        {orderReducer.error && orderReducer.error.status === 404 && (
-          <h2>{config.language[lang].orderNotFound}</h2>
-        )}
-      </div>
+      <ErrorMessages lang={lang} />
       {orderReducer.loading ? (
         <div className="center">En cours de chargement...</div>
       ) : (
         <>
           <div className="center">
             {config.language && <DisplayRegimes lang={lang} />}
-            {weekReducer.selectedWeek && <SelectWeek lang={lang} />}
+            {weekReducer.selectedWeek && orderReducer.order && (
+              <SelectWeek lang={lang} />
+            )}
           </div>
           <div className="centerColumn">
             {!orderReducer.loading &&

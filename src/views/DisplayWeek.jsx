@@ -1,33 +1,65 @@
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import DisplayWeekDates from "./DisplayWeekDates";
+import { addOrderLine } from "../services/OrderActions";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleXmark } from "@fortawesome/free-regular-svg-icons";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { isMealLineFull } from "../utils/functions";
+import { isMealLineFull, setUnixDate } from "../utils/functions";
 library.add(faCircleXmark);
 
 const DisplayWeek = ({ lang }) => {
   const dispatch = useDispatch();
+  const config = useSelector(
+    (state) => state.configurationReducer.configuration
+  );
   const weekStructures = useSelector(
     (state) => state.weekStructureReducer.weekStructure
   );
-
+  const regimeSelected = useSelector(
+    (state) => state.weekStructureReducer.regimeSelected
+  );
+  const selectedWeek = useSelector(
+    (state) => state.weekStructureReducer.selectedWeek
+  );
+  const order = useSelector((state) => state.orderReducer.order);
+  const handleCheckBox = (weekStructure, mealLineId, weekDay) => {
+    dispatch(
+      addOrderLine(
+        order,
+        selectedWeek.month,
+        {
+          array_options: {
+            options_lin_room: regimeSelected,
+            options_lin_intakeplace: weekStructure.rowId,
+            options_lin_datedebut: setUnixDate(selectedWeek.weekStart, weekDay), //convertToUnix(selectedDate),
+            options_lin_datefin: setUnixDate(selectedWeek.weekStart, weekDay),
+          },
+          fk_product: config.dolibarrMealCode[mealLineId],
+          label: config.meal[mealLineId].label,
+          qty: "1",
+          subprice: config.meal[mealLineId].price,
+          remise_percent: 0,
+        },
+        localStorage.getItem("token")
+      )
+    );
+  };
   return (
     <div className="tables">
       {/* {!loading ? ( */}
-      {weekStructures.map((weekStructure, index) => {
+      {weekStructures.map((weekStructure, placeId) => {
         return (
-          <div key={index} className="table">
+          <div key={placeId} className="table">
             <DisplayWeekDates lang={lang} place={weekStructure} />
             {weekStructure.isUnfolded &&
-              weekStructure.mealLines.map((mealLine, index) => {
+              weekStructure.mealLines.map((mealLine, mealLineId) => {
                 return (
-                  <div key={index} className="line">
+                  <div key={mealLineId} className="line">
                     <div className="left-div">
                       <div key={"start"}></div>
-                      {mealLine.map((mealBox, i) => {
+                      {mealLine.map((mealBox, weekDay) => {
                         return (
-                          <div key={i}>
+                          <div key={weekDay}>
                             <input
                               type="checkbox"
                               disabled={mealBox.disabled}
@@ -36,7 +68,11 @@ const DisplayWeek = ({ lang }) => {
                                 accentColor: mealBox.regimeColor,
                               }}
                               onChange={() => {
-                                // handleCheckBox(shift, id, firstDay);
+                                handleCheckBox(
+                                  weekStructure,
+                                  mealLineId,
+                                  weekDay
+                                );
                               }}
                             />
                           </div>
@@ -62,109 +98,5 @@ const DisplayWeek = ({ lang }) => {
     </div>
   );
 };
-
-{
-  /* {ids.map((id) => {
-                const adjust = adujstLengthMax(
-                  mm,
-                  month,
-                  week,
-                  init_week,
-                  lengthMax,
-                  id,
-                  hh,
-                  config.deadline
-                );
-                const lengthMaxId = adjust.length;
-                // const endDateCompensation = adjust.endDateCompensation;
-
-                return (
-                  <div key={id} className="line">
-                    <div
-                      className="left-div"
-                      id={id === maxid ? "last" : "notlast"}
-                    >
-                      {order.lines && (
-                        <Line
-                          id={id}
-                          date={date}
-                          week={week}
-                          init_week={init_week}
-                          month={month}
-                          place={place}
-                          meals={meals}
-                          disabledMeals={disabledMeals}
-                          regimeId={regimeId}
-                          lang={lang}
-                        ></Line>
-                      )}
-                    </div>
-                    {filterMeals(
-                      meals,
-                      id,
-                      week,
-                      init_week,
-                      firstWeekDay,
-                      place.rowid,
-                      mm,
-                      month
-                    ).length === lengthMaxId ? (
-                      <FontAwesomeIcon
-                        icon="fa-regular fa-circle-xmark"
-                        size="2xl"
-                        style={{ color: "#ab0032" }}
-                        onClick={() => {
-                          handleWeekButtons(id, month, week, place, 1);
-                        }}
-                      />
-                    ) : (
-                      !(
-                        month === mm &&
-                        week === init_week &&
-                        (day === 7 ||
-                          // day === lastWeekDay ||
-                          (day === 6 &&
-                            ((id === 1 && hh >= deadline.breakfast) ||
-                              (id === 2 && hh >= deadline.lunch) ||
-                              (id === 3 && hh >= deadline.dinner))))
-                      ) && (
-                        <div id="chevron">
-                          <FontAwesomeIcon
-                            icon="fa-solid fa-chevron-left"
-                            id="quickSelect"
-                            onClick={() => {
-                              handleWeekButtons(id, month, week, place, 0);
-                            }}
-                          />
-                        </div>
-                      )
-                    )}
-                  </div>
-                );
-              })} 
-        </div>
-      </div>
-      {/* ) : (
-          <div id="folded">
-            <h2>{place.label}</h2>
-            <FontAwesomeIcon
-              id="chevron"
-              onClick={() => {
-                dispatch(updateIsUnFolded(isUnFolded, index));
-              }}
-              icon="fa-solid fa-chevron-right"
-              size="xl"
-            />
-          </div>
-        ); */
-}
-
-{
-  /* // ) : (
-      //   <div className="center">
-      //     {config.language && config.language[lang].loading}
-      //   </div>
-      // )} */
-}
 
 export default DisplayWeek;

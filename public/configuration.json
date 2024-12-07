@@ -4,6 +4,11 @@
     "label": "Stage pour repas avec l'appli SHALZE"
   },
   "dolibarrMealCode": [2, 3, 4],
+  "meal": [
+    { "label": "Petit-déjeuner", "price": 2 },
+    { "label": "Déjeuner", "price": 3.5 },
+    { "label": "Dîner", "price": 3 }
+  ],
   "deadline": [7, 10, 17],
 
   "regimes": [
