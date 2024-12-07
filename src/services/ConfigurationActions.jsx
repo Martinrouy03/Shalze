@@ -5,8 +5,8 @@ export function getConfiguration() {
   return (dispatch) => {
     // let configurationFile = "";
 
+    console.log("getConfiguration Begin!");
     if (store.getState().configurationReducer.configuration !== "") return;
-
     fetch("configuration.json", {
       // cache: "no-store",
       headers: {
@@ -21,10 +21,12 @@ export function getConfiguration() {
       })
       .then((data) => {
         dispatch(getConfigurationSuccess(data));
+        console.log("getConfiguration Success!");
       })
       .catch((error) => {
         console.error("Fetch error:", error); // Logging fetch errors
         dispatch(getConfigurationFailure(error));
+        console.log("getConfiguration Failure!");
       });
   };
 }

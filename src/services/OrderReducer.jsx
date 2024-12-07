@@ -21,7 +21,7 @@ const initialState = {
       array_options: { options_civility: "" },
     },
   },
-  loading: false,
+  loading: true,
   error: null,
   orderToCloseEnd: false,
 };
@@ -54,7 +54,8 @@ export default function OrderReducer(state = initialState, action) {
       return {
         ...state,
         loading: false,
-        order: action.payload.order,
+        order: action.payload.output.order,
+        commandNb: action.payload.output.commandNb,
       };
 
     case GET_ORDER_FAILURE:

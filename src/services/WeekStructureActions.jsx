@@ -1,7 +1,9 @@
 // import { getPlacesValue } from "./PlacesActions";
 import { store } from "../app/App";
-import { convertDateToUnix, disabledMeal } from "../utils/functions";
+import { useSelector } from "react-redux";
 import {
+  convertDateToUnix,
+  disabledMeal,
   convertUnixToDate,
   computeNbWeeksBeforeMonthEnd,
   setUnixDate,
@@ -344,7 +346,8 @@ export const previousMonthLastWeekSuccess = (update) => ({
   payload: { update },
 });
 
-export function updateWeekStructure() {
+export function updateWeekStructure(orderLines, regimesList) {
+  console.log("update WeekStructure Begin");
   const config = store.getState().configurationReducer.configuration;
   const selectedWeek = JSON.parse(
     JSON.stringify(store.getState().weekStructureReducer.selectedWeek)
@@ -352,35 +355,34 @@ export function updateWeekStructure() {
   const weekStructures = JSON.parse(
     JSON.stringify(store.getState().weekStructureReducer.weekStructure)
   );
-
   return (dispatch) => {
-    console.log("update WeekStructure Begin");
     dispatch(updateWeekStructureBegin());
-    weekStructures.map((weekStructure, index) => {
-      for (let i = 0; i < 7; i++) {
-        weekStructure.mealLines[0][i].disabled = disabledMeal(
-          convertUnixToDate(selectedWeek.weekStart),
-          i,
-          convertUnixToDate(selectedWeek.monthStart),
-          convertUnixToDate(selectedWeek.monthEnd),
-          config.deadline.breakfast
-        );
-        weekStructure.mealLines[1][i].disabled = disabledMeal(
-          convertUnixToDate(selectedWeek.weekStart),
-          i,
-          convertUnixToDate(selectedWeek.monthStart),
-          convertUnixToDate(selectedWeek.monthEnd),
-          config.deadline.lunch
-        );
-        weekStructure.mealLines[2][i].disabled = disabledMeal(
-          convertUnixToDate(selectedWeek.weekStart),
-          i,
-          convertUnixToDate(selectedWeek.monthStart),
-          convertUnixToDate(selectedWeek.monthEnd),
-          config.deadline.dinner
-        );
-      }
-      return weekStructure;
+
+    weekStructures.map((weekStructure) => {
+      return weekStructure.mealLines.map((mealLine, mealId) => {
+        return mealLine.map((mealBox, weekDay) => {
+          mealBox.disabled = disabledMeal(
+            convertUnixToDate(selectedWeek.weekStart),
+            weekDay,
+            convertUnixToDate(selectedWeek.monthStart),
+            convertUnixToDate(selectedWeek.monthEnd),
+            config.deadline[mealId]
+          );
+          let mealBoxTmp = "";
+          mealBoxTmp = convertOrderLinesToBox(
+            orderLines,
+            weekStructure.rowId,
+            mealId,
+            regimesList,
+            config.dolibarrMealCode,
+            selectedWeek.weekStart,
+            selectedWeek.weekEnd,
+            weekDay
+          );
+          mealBox.booked = mealBoxTmp.booked;
+          mealBox.regimeColor = mealBoxTmp.regimeColor;
+        });
+      });
     });
     dispatch(updateWeekStructureSuccess(weekStructures));
     console.log("updateWeekStructureSuccess !");
@@ -435,3 +437,53 @@ export const updateFoldingFailure = (error) => ({
   type: UPDATE_FOLDING_FAILURE,
   payload: { error },
 });
+
+export const convertOrderLinesToBox = (
+  orderLines,
+  placeId,
+  mealId,
+  regimesList,
+  dolibarrMealCode,
+  weekStart,
+  weekEnd,
+  weekDay
+) => {
+  let output = {};
+  output.booked = 0;
+  output.regimeColor = "";
+  orderLines.map((orderLine) => {
+    const options = orderLine.array_options;
+    const checkBox_weekDay = setUnixDate(weekStart, weekDay); // jour correspondant à la mealBox considérée
+
+    if (
+      // Si le lieu correspond à placeId et si le fk_product correspond au repas
+      placeId === options.options_lin_intakeplace &&
+      orderLine.fk_product === String(dolibarrMealCode[mealId]) &&
+      checkBox_weekDay >= options.options_lin_datedebut &&
+      checkBox_weekDay <= options.options_lin_datefin // si la weekStructure correspond au lieu indiqué dans orderLines
+    ) {
+      output.booked = 1;
+      output.regimeColor = convertRegimeToColor(
+        regimesList,
+        options.options_lin_room
+      );
+    }
+  });
+  return output;
+};
+
+const convertRegimeToColor = (regimesList, regimeId) => {
+  // identifier le regime en question (regimeId) dans le régimeReducer
+
+  // trouver le regime correspondant dans le fichier de configuration à l'aide de son code
+  if (regimesList) {
+    const regimeSaved = regimesList.find((regime) => regime.rowid == regimeId);
+    const regimeConfig = store
+      .getState()
+      .configurationReducer.configuration.regimes.find(
+        (regime) => regime.code === regimeSaved.code
+      );
+    // Retourner la couleur:
+    return regimeConfig.color;
+  } else return "blue";
+};

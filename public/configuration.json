@@ -3,11 +3,9 @@
     "code": "STA24_9990",
     "label": "Stage pour repas avec l'appli SHALZE"
   },
-  "deadline": {
-    "breakfast": 7,
-    "lunch": 10,
-    "dinner": 17
-  },
+  "dolibarrMealCode": [2, 3, 4],
+  "deadline": [7, 10, 17],
+
   "regimes": [
     {
       "code": "MPT_VEGE",

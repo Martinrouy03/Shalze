@@ -11,13 +11,6 @@ const DisplayWeek = ({ lang }) => {
   const weekStructures = useSelector(
     (state) => state.weekStructureReducer.weekStructure
   );
-  // const regimesConfig = useSelector(
-  //   (state) => state.configurationReducer.configuration.regimes
-  // );
-  // const regimesReducer = useSelector((state) => state.regimesReducer);
-  // const regime = regimesReducer.list.find(
-  //   (regime) => regime.rowid === regimesReducer.selected
-  // );
 
   return (
     <div className="tables">

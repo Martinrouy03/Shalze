@@ -39,7 +39,7 @@ const OnePage = () => {
   const config = useSelector(
     (state) => state.configurationReducer.configuration
   );
-  const orderReducer = useSelector((state) => state.orderReducer.order);
+  const orderReducer = useSelector((state) => state.orderReducer);
   const weekReducer = useSelector((state) => state.weekStructureReducer);
   const modalClose = useSelector((state) => state.loginReducer.modalClose);
   const loginReducer = useSelector((state) => state.loginReducer);
@@ -53,17 +53,24 @@ const OnePage = () => {
     dispatch(getRegimes(token));
   }, []);
   useEffect(() => {
-    places[0] && dispatch(initWeekStructure());
-    config.codeRepas &&
-      weekReducer.weekStructure &&
-      dispatch(updateWeekStructure()); // TODO: check enchainement crado
-  }, [places, config]);
-  useEffect(() => {
     config.codeRepas && dispatch(getOrder(userId, token));
   }, [token, modalClose, loginReducer, config]);
-
   useEffect(() => {
-    config.codeRepas && dispatch(updateWeekStructure());
+    places[0] && dispatch(initWeekStructure());
+    places[0] &&
+      Object.keys(orderReducer.order).includes("lines") &&
+      regimesReducer.list.length > 0 &&
+      dispatch(
+        updateWeekStructure(orderReducer.order.lines, regimesReducer.list)
+      );
+  }, [orderReducer.order, regimesReducer.list]);
+  useEffect(() => {
+    config.codeRepas &&
+      Object.keys(orderReducer.order).includes("lines") &&
+      regimesReducer.list.length > 0 &&
+      dispatch(
+        updateWeekStructure(orderReducer.order.lines, regimesReducer.list)
+      );
   }, [weekReducer.selectedWeek]);
   return (
     <div>
@@ -84,42 +91,21 @@ const OnePage = () => {
           <h2>{config.language[lang].orderNotFound}</h2>
         )}
       </div>
-      <div className="center">
-        {config.language && <DisplayRegimes lang={lang} />}
-        {weekReducer.selectedWeek && <SelectWeek lang={lang} />}
-      </div>
-      <div className="centerColumn">
-        {weekReducer.weekStructure && weekReducer.selectedWeek && (
-          <DisplayWeek lang={lang} />
-        )}
-        {/* <h2>Current Month</h2>
-        <h3>Max Weeks: {dateReducer.currentMonth.maxWeek}</h3>
-        <h3>Mois: {dateReducer.currentMonth.month}</h3> */}
-      </div>
-      {/* <div className="centerColumn">
-        <h2>Selected Week</h2>
-
-        <h3>
-          nb de semaines avant la fin du mois:{" "}
-          {dateReducer.selectedMonth.nbWeeksBeforeMonthEnd}
-        </h3>
-        <h3>
-          nb de semaines depuis début du mois:{" "}
-          {dateReducer.selectedMonth.nbWeeksSinceMonthStart}
-        </h3>
-        <h3>Mois: {dateReducer.selectedMonth.month}</h3>
-        <h3>
-          Début de semaine:{" "}
-          {convertUnixToDate(
-            dateReducer.selectedWeek.weekStart
-          ).toLocaleDateString()}
-        </h3>
-        <h3>Mois: {dateReducer.selectedMonth.month}</h3>
-      </div>
-      <div className="centerColumn">
-        <h2>Dernier du mois</h2>
-        <h3>{monthEnd}</h3>
-      </div> */}
+      {orderReducer.loading ? (
+        <div className="center">En cours de chargement...</div>
+      ) : (
+        <>
+          <div className="center">
+            {config.language && <DisplayRegimes lang={lang} />}
+            {weekReducer.selectedWeek && <SelectWeek lang={lang} />}
+          </div>
+          <div className="centerColumn">
+            {!orderReducer.loading &&
+              weekReducer.weekStructure &&
+              weekReducer.selectedWeek && <DisplayWeek lang={lang} />}
+          </div>
+        </>
+      )}
     </div>
   );
 };

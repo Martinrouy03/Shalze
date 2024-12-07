@@ -6,7 +6,11 @@ import {
   // UPDATE_REGIME_SUCCESS,
 } from "./RegimesActions";
 
-const initialState = [];
+const initialState = {
+  list: [],
+  loading: true,
+  error: null,
+};
 
 export default function RegimesReducer(state = initialState, action) {
   switch (action.type) {

@@ -4,8 +4,8 @@ import moment from "moment";
 import { getConfigurationValue } from "./ConfigurationActions.jsx";
 
 export function getOrder(customerID, token) {
-  const currentMonth = new Date().getMonth();
-  const month = currentMonth;
+  // const currentMonth = new Date().getMonth();
+  // const month = currentMonth;
   let codeRepas = getConfigurationValue("codeRepas");
   codeRepas = codeRepas.code;
   return (dispatch) => {
@@ -43,14 +43,14 @@ export function getOrder(customerID, token) {
           (order) =>
             new Date(
               moment.unix(order.lines[0].array_options.options_lin_datedebut) //
-            ).getMonth() === month
+            ).getMonth() === new Date().getMonth()
         );
         // dispatch(getOrderSuccess(order[0]));
         dispatch(
           getOrderSuccess({
             order: order[0],
             commandNb: commandNb,
-            currentMonth: currentMonth,
+            // currentMonth: currentMonth,
           })
         );
 
@@ -88,9 +88,9 @@ export const getOrderBegin = () => ({
   type: GET_ORDER_BEGIN,
 });
 
-export const getOrderSuccess = (order) => ({
+export const getOrderSuccess = (output) => ({
   type: GET_ORDER_SUCCESS,
-  payload: { order },
+  payload: { output },
 });
 
 export const getOrderFailure = (error) => ({
