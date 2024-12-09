@@ -45,7 +45,7 @@ const SelectWeek = ({ lang }) => {
           id="chevron"
           onClick={() => {
             if (selectedWeek.monthCounter === commandNb - 1) {
-              //TODO
+              // TODO: check here
               console.log("Pas de commande pour le mois prochain");
             } else {
               dispatch(nextMonth());
@@ -79,7 +79,7 @@ const SelectWeek = ({ lang }) => {
             } else if (selectedWeek.nbWeeksBeforeMonthEnd === 0) {
               if (selectedWeek.monthCounter === commandNb - 1) {
                 console.log("Pas de commande !!");
-                //TODO
+                //TODO: create error message!!
                 // Add ErrorReducer;
                 // Display error Message : config.NoCommand => Pas de commande pour le mois prochain
               } else {

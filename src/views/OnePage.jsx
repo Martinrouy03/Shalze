@@ -22,8 +22,6 @@ import {
 } from "../services/WeekStructureActions";
 import { convertUnixToDate } from "../utils/functions";
 
-let token = localStorage.getItem("token") || "";
-
 // State instantiations:
 const navLanguage = navigator.language || navigator.userLanguage;
 let initLang = "";
@@ -34,6 +32,9 @@ if (navLanguage.includes("fr")) {
 }
 
 const OnePage = () => {
+  const token = localStorage.getItem("token") || "";
+  const userId = localStorage.getItem("userId") || "";
+
   const dispatch = useDispatch();
   const [lang, setLang] = useState(initLang);
   const config = useSelector(
@@ -41,20 +42,18 @@ const OnePage = () => {
   );
   const orderReducer = useSelector((state) => state.orderReducer);
   const weekReducer = useSelector((state) => state.weekStructureReducer);
-  const modalClose = useSelector((state) => state.loginReducer.modalClose);
   const loginReducer = useSelector((state) => state.loginReducer);
   const places = useSelector((state) => state.placesReducer.places);
   const regimesReducer = useSelector((state) => state.regimesReducer);
   useEffect(() => {
     dispatch(getConfiguration());
     dispatch(initDate());
-    dispatch(getPlaces(token));
-    dispatch(getRegimes(token));
-  }, []);
-  // console.log("order: ", orderReducer.order);
+    token && dispatch(getPlaces(token));
+    token && dispatch(getRegimes(token));
+  }, [token]);
   useEffect(() => {
-    config.codeRepas && dispatch(getOrder());
-  }, [modalClose, loginReducer, config]);
+    token && userId && config.codeRepas && dispatch(getOrder());
+  }, [loginReducer.modalClose, config, userId]);
   useEffect(() => {
     places[0] && dispatch(initWeekStructure());
     places[0] &&
@@ -72,12 +71,17 @@ const OnePage = () => {
         updateWeekStructure(orderReducer.order.lines, regimesReducer.list)
       );
   }, [weekReducer.selectedWeek]);
+
   return (
     <div>
       <Header lang={lang} setLang={setLang} initLang={initLang} token={token} />
-      {!modalClose && config.language && !token && <LoginModal lang={lang} />}
       <ErrorMessages lang={lang} />
-      {orderReducer.loading ? (
+      {config.language && !loginReducer.modalClose && !token && (
+        <LoginModal lang={lang} />
+      )}
+      {!token ? (
+        <div className="center">{config.language[lang].signinMessage}</div>
+      ) : orderReducer.loading ? (
         <div className="center">En cours de chargement...</div>
       ) : (
         <>

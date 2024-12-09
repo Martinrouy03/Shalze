@@ -376,7 +376,6 @@ export function updateWeekStructure(orderLines, regimesList) {
             regimesList,
             config.dolibarrMealCode,
             selectedWeek.weekStart,
-            selectedWeek.weekEnd,
             weekDay
           );
           mealBox.booked = mealBoxTmp.booked;
@@ -445,7 +444,6 @@ export const convertOrderLinesToBox = (
   regimesList,
   dolibarrMealCode,
   weekStart,
-  weekEnd,
   weekDay
 ) => {
   let output = {};

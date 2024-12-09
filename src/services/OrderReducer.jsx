@@ -21,7 +21,7 @@ const initialState = {
       array_options: { options_civility: "" },
     },
   },
-  loading: true,
+  loading: false,
   error: null,
   orderToCloseEnd: false,
 };

@@ -57,7 +57,7 @@ export default function LoginReducer(state = initialState, action) {
       return {
         ...state,
         loading: true,
-        isLogged: false,
+        isLogged: true,
         error: null,
       };
     case LOGOUT_USER_SUCCESS:

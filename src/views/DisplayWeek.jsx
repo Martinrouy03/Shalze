@@ -21,6 +21,7 @@ const DisplayWeek = ({ lang }) => {
   const selectedWeek = useSelector(
     (state) => state.weekStructureReducer.selectedWeek
   );
+  const token = localStorage.getItem("token");
   const order = useSelector((state) => state.orderReducer.order);
   const handleCheckBox = (weekStructure, mealLineId, weekDay) => {
     dispatch(
@@ -31,7 +32,7 @@ const DisplayWeek = ({ lang }) => {
           array_options: {
             options_lin_room: regimeSelected,
             options_lin_intakeplace: weekStructure.rowId,
-            options_lin_datedebut: setUnixDate(selectedWeek.weekStart, weekDay), //convertToUnix(selectedDate),
+            options_lin_datedebut: setUnixDate(selectedWeek.weekStart, weekDay),
             options_lin_datefin: setUnixDate(selectedWeek.weekStart, weekDay),
           },
           fk_product: config.dolibarrMealCode[mealLineId],
@@ -40,7 +41,7 @@ const DisplayWeek = ({ lang }) => {
           subprice: config.meal[mealLineId].price,
           remise_percent: 0,
         },
-        localStorage.getItem("token")
+        token
       )
     );
   };
