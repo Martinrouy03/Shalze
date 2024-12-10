@@ -1,6 +1,7 @@
 import { const_apiurl } from "../Constant.js";
 import axios from "axios";
 import moment from "moment";
+import { setUnixDate } from "../utils/functions.js";
 import { getConfigurationValue } from "./ConfigurationActions.jsx";
 
 export function getOrder() {
@@ -97,16 +98,9 @@ export const getOrderFailure = (error) => ({
   payload: { error },
 });
 
-export function updateOrderLine(
-  orderId,
-  orderLineId,
-  orderLine,
-  customerID,
-  month,
-  token
-) {
+export function updateOrderLine(orderId, orderLine, customerID, month, token) {
   return (dispatch) => {
-    console.log("updateOrderLineBegin : " + orderLineId);
+    console.log("updateOrderLineBegin : " + orderLine.id);
     dispatch(updateOrderLineBegin());
     return axios
       .put(
@@ -114,7 +108,7 @@ export function updateOrderLine(
           "orders/" +
           orderId +
           "/lines/" +
-          orderLineId +
+          orderLine.id +
           "?DOLAPIKEY=" +
           token,
         orderLine
@@ -176,6 +170,16 @@ export function addOrderLine(order, month, orderline, token) {
   return (dispatch) => {
     console.log("addOrderLineBegin " + order.id);
     dispatch(addOrderLineBegin());
+    console.log(
+      const_apiurl + "orders/" + order.id + "/lines" + "?DOLAPIKEY=" + token,
+      {
+        fk_product: orderline.fk_product,
+        label: orderline.label,
+        array_options: orderline.array_options,
+        qty: orderline.qty,
+        subprice: orderline.subprice,
+      }
+    );
     return axios
       .post(
         const_apiurl + "orders/" + order.id + "/lines" + "?DOLAPIKEY=" + token,
@@ -329,50 +333,43 @@ export function orderBreakLine(
   order,
   orderline,
   breakDate,
-  isBridgeLine,
+  // isBridgeLine,
   month,
   token
 ) {
   return (dispatch) => {
     console.log("setorderBreakLine :  " + orderline.id);
-    const newEndDate = breakDate - 24 * 3600;
+    console.log(token);
+    // const newEndDate = breakDate - 24 * 3600;
+    const newEndDate = setUnixDate(breakDate, -1);
 
-    // *** Create a deep copy to modify the current line
-    const locOrderLine = {
-      ...orderline,
-      array_options: { ...orderline.array_options },
-    };
-    const endDate = locOrderLine.array_options.options_lin_datefin;
-
-    // *** Compute the line to be modfied
-    let diffInDays =
+    // Update line:
+    orderline.array_options.options_lin_datefin = newEndDate;
+    orderline.qty =
       Math.floor(
-        (newEndDate - locOrderLine.array_options.options_lin_datedebut) /
+        (newEndDate - orderline.array_options.options_lin_datedebut) /
           (60 * 60 * 24)
       ) + 1;
-    locOrderLine.array_options.options_lin_datefin = newEndDate;
-    locOrderLine.qty = diffInDays;
 
     /** Create the new line */
-    let newStartDate = breakDate;
-    if (isBridgeLine) {
-      newStartDate = breakDate + 7 * 24 * 3600;
-    } else {
-      newStartDate = breakDate + 1 * 24 * 3600;
-    }
-    // let newStartDate = breakDate + 24 * 3600;
+    // if (isBridgeLine) {
+    //   newStartDate = breakDate + 7 * 24 * 3600;
+    // } else {
+    //   newStartDate = breakDate + 1 * 24 * 3600;
+    // }
+    const newStartDate = setUnixDate(breakDate, 1);
+    const endDate = orderline.array_options.options_lin_datefin;
     let diffInDays2 = (endDate - newStartDate) / (60 * 60 * 24) + 1;
     /** Send to database */
     dispatch(
       updateOrderLineandAddOrderline(
         order.id,
-        locOrderLine.id,
-        locOrderLine,
+        orderline,
         month,
         order,
         {
-          fk_product: locOrderLine.fk_product,
-          label: locOrderLine.label,
+          fk_product: orderline.fk_product,
+          label: orderline.label,
           array_options: {
             options_lin_datedebut: newStartDate,
             options_lin_datefin: endDate,
@@ -411,7 +408,6 @@ export const setorderBreakLineFailure = (error) => ({
 /** Update an order line d add a new line 
  * use by the break meal line
 * @param {*} orderid 
-* @param {*} orderLineid : orderline id to be updated
 * @param {*} orderline : data to fill the order to be updated
 * @param {*} order
 * @param {*} addStruct : data to fill the order to be created
@@ -419,7 +415,6 @@ export const setorderBreakLineFailure = (error) => ({
 */
 export function updateOrderLineandAddOrderline(
   orderid,
-  orderLineid,
   orderline,
   month,
   order,
@@ -427,7 +422,7 @@ export function updateOrderLineandAddOrderline(
   token
 ) {
   return (dispatch) => {
-    console.log("updateOrderLineandAddOrderlineBegin " + orderLineid);
+    console.log("updateOrderLineandAddOrderlineBegin " + orderline.id);
 
     dispatch(updateOrderLineandAddOrderlineBegin());
 
@@ -437,7 +432,7 @@ export function updateOrderLineandAddOrderline(
           "orders/" +
           orderid +
           "/lines/" +
-          orderLineid +
+          orderline.id +
           "?DOLAPIKEY=" +
           token,
         orderline

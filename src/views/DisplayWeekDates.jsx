@@ -47,13 +47,13 @@ const DisplayWeekDates = ({ lang, place }) => {
       )}
     </div>,
   ];
+  // style={{ color: dinner[i].disabled ? "grey" : "black" }}
   for (let i = 0; i < 7; i++) {
     const newDate = new Date(weekStart);
     weekNames.push(
       <div
         key={i}
         style={{
-          color: dinner[i].disabled ? "grey" : "black",
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-end",
@@ -63,7 +63,7 @@ const DisplayWeekDates = ({ lang, place }) => {
       </div>
     );
     weekDates.push(
-      <div key={i} style={{ color: dinner[i].disabled ? "grey" : "black" }}>
+      <div key={i}>
         {new Date(newDate.setDate(weekStart.getDate() + i)).getDate()}
       </div>
     );

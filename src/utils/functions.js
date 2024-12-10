@@ -55,13 +55,37 @@ export function computeNbWeeksSinceMonthStart(weekEnd, monthStart) {
   return nbWeeksBeforeMonthEnd;
 }
 
-export function disabledMeal(weekStart, i, monthStart, monthEnd, deadline) {
+export function disabledMeal(
+  weekStructures,
+  placeId,
+  mealId,
+  weekDay,
+  weekStart,
+  monthStart,
+  monthEnd,
+  deadline
+) {
+  const config = store.getState().configurationReducer.configuration;
   let output = null;
   const newDate = new Date(weekStart);
   const day_i = new Date(
-    new Date(newDate.setDate(weekStart.getDate() + i)).setHours(0, 0, 0, 0)
+    new Date(newDate.setDate(weekStart.getDate() + weekDay)).setHours(
+      0,
+      0,
+      0,
+      0
+    )
   );
-  // console.log(monthStart.getMonth(), new Date().getMonth());
+  let alreadyBookedElsewhere = 0; // Check if the meal is already booked in another place
+  weekStructures.map((weekStructure, placeBis) => {
+    if (
+      placeBis !== placeId &&
+      weekStructure.mealLines[mealId][weekDay].booked
+    ) {
+      alreadyBookedElsewhere = 1;
+    }
+  });
+
   if (monthStart.getMonth() === new Date().getMonth()) {
     if (
       // Si le jour considéré est compris entre aujourd'hui et la fin du mois
@@ -75,7 +99,10 @@ export function disabledMeal(weekStart, i, monthStart, monthEnd, deadline) {
         new Date().getHours() >= deadline
       ) {
         output = 1; // alors le repas est indisponible à la réservation
+      } else if (alreadyBookedElsewhere) {
+        output = 1;
       } else {
+        // Si le repas n'est pas déjà réservé sur un autre lieu
         output = 0; // Autrement le repas est disponible
       }
     } else {
@@ -89,7 +116,7 @@ export function disabledMeal(weekStart, i, monthStart, monthEnd, deadline) {
       day_i <= monthEnd
     ) {
       output = 0; //repas est disponible
-    } else output = 1; // repas sont indisponibles à la réservation
+    } else output = 1; // repas indisponible à la réservation
   }
   return output;
 }

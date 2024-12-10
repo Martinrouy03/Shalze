@@ -357,17 +357,9 @@ export function updateWeekStructure(orderLines, regimesList) {
   );
   return (dispatch) => {
     dispatch(updateWeekStructureBegin());
-
     weekStructures.map((weekStructure) => {
       return weekStructure.mealLines.map((mealLine, mealId) => {
         return mealLine.map((mealBox, weekDay) => {
-          mealBox.disabled = disabledMeal(
-            convertUnixToDate(selectedWeek.weekStart),
-            weekDay,
-            convertUnixToDate(selectedWeek.monthStart),
-            convertUnixToDate(selectedWeek.monthEnd),
-            config.deadline[mealId]
-          );
           let mealBoxTmp = "";
           mealBoxTmp = convertOrderLinesToBox(
             orderLines,
@@ -380,6 +372,22 @@ export function updateWeekStructure(orderLines, regimesList) {
           );
           mealBox.booked = mealBoxTmp.booked;
           mealBox.regimeColor = mealBoxTmp.regimeColor;
+        });
+      });
+    });
+    weekStructures.map((weekStructure, placeId) => {
+      return weekStructure.mealLines.map((mealLine, mealId) => {
+        return mealLine.map((mealBox, weekDay) => {
+          mealBox.disabled = disabledMeal(
+            weekStructures,
+            placeId,
+            mealId,
+            weekDay,
+            convertUnixToDate(selectedWeek.weekStart),
+            convertUnixToDate(selectedWeek.monthStart),
+            convertUnixToDate(selectedWeek.monthEnd),
+            config.deadline[mealId]
+          );
         });
       });
     });
@@ -401,39 +409,6 @@ export const updateWeekStructureSuccess = (update) => ({
 });
 export const updateWeekStructureFailure = (error) => ({
   type: UPDATE_WEEKSTRUCTURE_FAILURE,
-  payload: { error },
-});
-
-export function updateFolding(rowId) {
-  const weekStructures = JSON.parse(
-    JSON.stringify(store.getState().weekStructureReducer.weekStructure)
-  );
-  return (dispatch) => {
-    console.log("update Folding Begin");
-    dispatch(updateFoldingBegin());
-    weekStructures.map((weekStructure) => {
-      if (weekStructure.rowId === rowId) {
-        weekStructure.isUnfolded = !weekStructure.isUnfolded;
-      }
-    });
-    dispatch(updateFoldingSuccess(weekStructures));
-    console.log("updatFoldingSuccess !");
-  };
-}
-
-export const UPDATE_FOLDING_BEGIN = "UPDATE_FOLDING_BEGIN";
-export const UPDATE_FOLDING_SUCCESS = "UPDATE_FOLDING_SUCCESS";
-export const UPDATE_FOLDING_FAILURE = "UPDATE_FOLDING_FAILURE";
-
-export const updateFoldingBegin = () => ({
-  type: UPDATE_FOLDING_BEGIN,
-});
-export const updateFoldingSuccess = (update) => ({
-  type: UPDATE_FOLDING_SUCCESS,
-  payload: { update },
-});
-export const updateFoldingFailure = (error) => ({
-  type: UPDATE_FOLDING_FAILURE,
   payload: { error },
 });
 
@@ -485,3 +460,36 @@ const convertRegimeToColor = (regimesList, regimeId) => {
     return regimeConfig.color;
   } else return "blue";
 };
+
+export function updateFolding(rowId) {
+  const weekStructures = JSON.parse(
+    JSON.stringify(store.getState().weekStructureReducer.weekStructure)
+  );
+  return (dispatch) => {
+    console.log("update Folding Begin");
+    dispatch(updateFoldingBegin());
+    weekStructures.map((weekStructure) => {
+      if (weekStructure.rowId === rowId) {
+        weekStructure.isUnfolded = !weekStructure.isUnfolded;
+      }
+    });
+    dispatch(updateFoldingSuccess(weekStructures));
+    console.log("updatFoldingSuccess !");
+  };
+}
+
+export const UPDATE_FOLDING_BEGIN = "UPDATE_FOLDING_BEGIN";
+export const UPDATE_FOLDING_SUCCESS = "UPDATE_FOLDING_SUCCESS";
+export const UPDATE_FOLDING_FAILURE = "UPDATE_FOLDING_FAILURE";
+
+export const updateFoldingBegin = () => ({
+  type: UPDATE_FOLDING_BEGIN,
+});
+export const updateFoldingSuccess = (update) => ({
+  type: UPDATE_FOLDING_SUCCESS,
+  payload: { update },
+});
+export const updateFoldingFailure = (error) => ({
+  type: UPDATE_FOLDING_FAILURE,
+  payload: { error },
+});
