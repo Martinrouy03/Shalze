@@ -1,4 +1,5 @@
 import { const_apiurl } from "../Constant.js";
+import { store } from "../app/App.js";
 import axios from "axios";
 import moment from "moment";
 import { setUnixDate } from "../utils/functions.js";
@@ -7,10 +8,10 @@ import { getConfigurationValue } from "./ConfigurationActions.jsx";
 export function getOrder() {
   const customerID = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
-  // const currentMonth = new Date().getMonth();
-  // const month = currentMonth;
   let codeRepas = getConfigurationValue("codeRepas");
   codeRepas = codeRepas.code;
+  const selectedMonth =
+    store.getState().weekStructureReducer.selectedWeek.month;
   return (dispatch) => {
     console.log("getOrderBegin : Customer " + customerID);
     dispatch(getOrderBegin());
@@ -43,14 +44,12 @@ export function getOrder() {
           (order) =>
             new Date(
               moment.unix(order.lines[0].array_options.options_lin_datedebut) //
-            ).getMonth() === new Date().getMonth()
+            ).getMonth() === selectedMonth //new Date().getMonth()
         );
-        // dispatch(getOrderSuccess(order[0]));
         dispatch(
           getOrderSuccess({
             order: order[0],
             commandNb: commandNb,
-            // currentMonth: currentMonth,
           })
         );
 
@@ -333,46 +332,40 @@ export function orderBreakLine(
   order,
   orderline,
   breakDate,
-  // isBridgeLine,
+  isBridgeLine,
   month,
   token
 ) {
   return (dispatch) => {
     console.log("setorderBreakLine :  " + orderline.id);
-    console.log(token);
-    // const newEndDate = breakDate - 24 * 3600;
-    const newEndDate = setUnixDate(breakDate, -1);
+    const endDateUpdated = setUnixDate(breakDate, -1);
+    const endDateNew = orderline.array_options.options_lin_datefin;
 
     // Update line:
-    orderline.array_options.options_lin_datefin = newEndDate;
-    orderline.qty =
+    orderline.array_options.options_lin_datefin = endDateUpdated;
+    orderline.qty = String(
       Math.floor(
-        (newEndDate - orderline.array_options.options_lin_datedebut) /
+        (endDateUpdated - orderline.array_options.options_lin_datedebut) /
           (60 * 60 * 24)
-      ) + 1;
+      ) + 1
+    );
 
     /** Create the new line */
-    // if (isBridgeLine) {
-    //   newStartDate = breakDate + 7 * 24 * 3600;
-    // } else {
-    //   newStartDate = breakDate + 1 * 24 * 3600;
-    // }
-    const newStartDate = setUnixDate(breakDate, 1);
-    const endDate = orderline.array_options.options_lin_datefin;
-    let diffInDays2 = (endDate - newStartDate) / (60 * 60 * 24) + 1;
+    const newStartDate = isBridgeLine
+      ? setUnixDate(breakDate, 7)
+      : setUnixDate(breakDate, 1);
+    let diffInDays2 = (endDateNew - newStartDate) / (60 * 60 * 24) + 1;
     /** Send to database */
     dispatch(
-      updateOrderLineandAddOrderline(
-        order.id,
-        orderline,
-        month,
+      addOrderLine(
         order,
+        month,
         {
           fk_product: orderline.fk_product,
           label: orderline.label,
           array_options: {
             options_lin_datedebut: newStartDate,
-            options_lin_datefin: endDate,
+            options_lin_datefin: endDateNew,
             options_lin_room: orderline.array_options.options_lin_room,
             options_lin_intakeplace:
               orderline.array_options.options_lin_intakeplace,
@@ -383,6 +376,30 @@ export function orderBreakLine(
         token
       )
     );
+    dispatch(updateOrderLine(order.id, orderline, order.socid, month, token));
+
+    // dispatch(
+    //   updateOrderLineandAddOrderline(
+    //     order.id,
+    //     orderline,
+    //     month,
+    //     order,
+    // {
+    //   fk_product: orderline.fk_product,
+    //   label: orderline.label,
+    //   array_options: {
+    //     options_lin_datedebut: newStartDate,
+    //     options_lin_datefin: endDate,
+    //     options_lin_room: orderline.array_options.options_lin_room,
+    //     options_lin_intakeplace:
+    //       orderline.array_options.options_lin_intakeplace,
+    //   },
+    //   qty: String(diffInDays2),
+    //   subprice: orderline.subprice,
+    // },
+    //     token
+    //   )
+    // );
   };
 }
 
@@ -405,7 +422,7 @@ export const setorderBreakLineFailure = (error) => ({
 });
 
 // *****************************************************************************************
-/** Update an order line d add a new line 
+/** Update an order line and add a new line 
  * use by the break meal line
 * @param {*} orderid 
 * @param {*} orderline : data to fill the order to be updated
@@ -424,8 +441,7 @@ export function updateOrderLineandAddOrderline(
   return (dispatch) => {
     console.log("updateOrderLineandAddOrderlineBegin " + orderline.id);
 
-    dispatch(updateOrderLineandAddOrderlineBegin());
-
+    dispatch(addOrderLine(order, month, addStruct, token));
     return axios
       .put(
         const_apiurl +

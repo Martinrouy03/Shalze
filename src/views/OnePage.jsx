@@ -20,7 +20,6 @@ import {
   initWeekStructure,
   updateWeekStructure,
 } from "../services/WeekStructureActions";
-import { convertUnixToDate } from "../utils/functions";
 
 // State instantiations:
 const navLanguage = navigator.language || navigator.userLanguage;
@@ -53,7 +52,8 @@ const OnePage = () => {
   }, [token]);
   useEffect(() => {
     token && userId && config.codeRepas && dispatch(getOrder());
-  }, [loginReducer.modalClose, config, userId]);
+  }, [loginReducer.modalClose, config, userId, weekReducer.selectedWeek.month]);
+  console.log(orderReducer.order.id);
   useEffect(() => {
     places[0] && dispatch(initWeekStructure());
     places[0] &&

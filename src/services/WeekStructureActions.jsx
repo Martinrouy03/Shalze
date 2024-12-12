@@ -1,6 +1,5 @@
 // import { getPlacesValue } from "./PlacesActions";
 import { store } from "../app/App";
-import { useSelector } from "react-redux";
 import {
   convertDateToUnix,
   disabledMeal,

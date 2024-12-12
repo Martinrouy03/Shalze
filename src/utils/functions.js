@@ -134,3 +134,13 @@ export const isMealLineFull = (mealLine) => {
   });
   return bookedCount === enabledCount && enabledCount > 0;
 };
+export const computeDateInfos = (mealLine) => {
+  let output = { date: "", qty: 0 };
+  output.date = mealLine[new Date().getDay() || 7].disabled
+    ? setUnixDate(convertDateToUnix(new Date().setHours(0, 0, 0, 0)), 1)
+    : convertDateToUnix(new Date().setHours(0, 0, 0, 0));
+  output.qty = mealLine[new Date().getDay() || 7].disabled
+    ? 7 - (new Date().getDay() || 7)
+    : 7 - ((new Date().getDay() || 7) - 1);
+  return output;
+};
