@@ -318,7 +318,7 @@ const DisplayWeek = ({ lang }) => {
         )
       );
     });
-    // Identifier les orderlines qui sont débordent sur la semaine précédente ou suivante:
+    // Identifier les orderlines qui débordent sur la semaine précédente ou suivante:
     let crossingLines = order.lines.filter(
       (line) =>
         line.array_options.options_lin_intakeplace === weekStructure.rowId &&
@@ -330,35 +330,50 @@ const DisplayWeek = ({ lang }) => {
             setUnixDate(selectedWeek.weekEnd, 1) &&
             line.array_options.options_lin_datefin > selectedWeek.weekEnd))
     );
-    crossingLines = {
-      ...crossingLines,
-      array_options: { ...crossingLines.array_options },
-    };
+
     // Si c'est la première semaine:
-    // # To Test:
     if (selectedWeek.nbWeeksSinceMonthStart === 0) {
       let qty = 0;
-      const output = computeDateInfos(weekStructure.mealLines[mealLineId]);
+      let datedebut = null;
+      let crossingLineNext = {};
       if (selectedWeek.month === new Date().getMonth()) {
         // Si c'est la semaine en cours:
-        crossingLines.array_options.options_lin_datedebut = output.date;
-        qty = output.qty; // TODO: refaire le calcul de totalDaysUnavailable en tenant compte de la deadline horaire
-        //  return qty;
+        const output = computeDateInfos(weekStructure.mealLines[mealLineId]);
+        if (crossingLines.length) {
+          crossingLineNext = {
+            ...crossingLines[0],
+            array_options: { ...crossingLines[0].array_options },
+          };
+          crossingLineNext.array_options.options_lin_datedebut = output.date;
+        }
+        datedebut = output.date;
+        qty = output.qty;
       } else {
         // Sinon, si c'est la première semaine du mois
-        crossingLines.array_options.options_lin_datedebut =
-          selectedWeek.monthStart;
+        if (crossingLines.length) {
+          crossingLineNext = {
+            ...crossingLines[0],
+            array_options: { ...crossingLines[0].array_options },
+          };
+          crossingLineNext.array_options.options_lin_datedebut =
+            selectedWeek.monthStart;
+        }
+        // if (crossingLineNext.length) {
+        //   crossingLineNext[0].array_options.options_lin_datedebut =
+        //     selectedWeek.monthStart;
+        // }
+        datedebut = selectedWeek.monthStart;
         qty =
           7 - ((convertUnixToDate(selectedWeek.monthStart).getDay() || 7) - 1);
-        // return qty;
       }
+      // S'il y a une crossingLineNext:
       if (crossingLines.length) {
-        const crossingLine = crossingLines[0];
-        // Si crossingLineNext: updateOrderLine
+        // TODO : a tester
+        console.log(crossingLineNext);
         dispatch(
           updateOrderLine(
             order.id,
-            crossingLine,
+            crossingLineNext,
             userId,
             selectedWeek.month,
             token
@@ -374,13 +389,12 @@ const DisplayWeek = ({ lang }) => {
               array_options: {
                 options_lin_room: regimeSelected,
                 options_lin_intakeplace: weekStructure.rowId,
-                options_lin_datedebut: output.date,
-
+                options_lin_datedebut: datedebut,
                 options_lin_datefin: selectedWeek.weekEnd,
               },
               fk_product: config.dolibarrMealCode[mealLineId],
               label: config.meal[mealLineId].label,
-              qty: output.qty,
+              qty: qty,
               subprice: config.meal[mealLineId].price,
               remise_percent: 0,
             },
@@ -389,35 +403,53 @@ const DisplayWeek = ({ lang }) => {
         );
       }
     } else if (selectedWeek.nbWeeksBeforeMonthEnd === 0) {
-      // # Reprendre
       // Si c'est la dernière semaine du mois:
       const totalDaysAvailable =
         convertUnixToDate(selectedWeek.monthEnd).getDay() || 7;
-      // Si crossingLinePrevious: updateOrderLine:
-      // Sinon: addOrderLine
-      dispatch(
-        addOrderLine(
-          order,
-          selectedWeek.month,
-          {
-            array_options: {
-              options_lin_room: regimeSelected,
-              options_lin_intakeplace: weekStructure.rowId,
-              options_lin_datedebut: selectedWeek.weekStart,
-              options_lin_datefin: setUnixDate(
-                selectedWeek.weekStart,
-                totalDaysAvailable - 1
-              ),
-            },
-            fk_product: config.dolibarrMealCode[mealLineId],
-            label: config.meal[mealLineId].label,
-            qty: String(totalDaysAvailable),
-            subprice: config.meal[mealLineId].price,
-            remise_percent: 0,
-          },
-          token
-        )
+      const datefin = setUnixDate(
+        selectedWeek.weekStart,
+        totalDaysAvailable - 1
       );
+
+      // Si crossingLinePrevious:
+      // TODO: A tester
+      if (crossingLines.length) {
+        const crossingLinePrevious = {
+          ...crossingLines[0],
+          array_options: { ...crossingLines[0].array_options },
+        };
+        crossingLinePrevious.array_options.options_lin_datefin = datefin;
+        dispatch(
+          updateOrderLine(
+            order.id,
+            crossingLinePrevious,
+            userId,
+            selectedWeek.month,
+            token
+          )
+        );
+      } else {
+        dispatch(
+          addOrderLine(
+            order,
+            selectedWeek.month,
+            {
+              array_options: {
+                options_lin_room: regimeSelected,
+                options_lin_intakeplace: weekStructure.rowId,
+                options_lin_datedebut: selectedWeek.weekStart,
+                options_lin_datefin: datefin,
+              },
+              fk_product: config.dolibarrMealCode[mealLineId],
+              label: config.meal[mealLineId].label,
+              qty: String(totalDaysAvailable),
+              subprice: config.meal[mealLineId].price,
+              remise_percent: 0,
+            },
+            token
+          )
+        );
+      }
     } else {
       // Si crossingLinesPrevious && Next: mergeLines
       // sinon si crossingLines Previous: updateOrderline

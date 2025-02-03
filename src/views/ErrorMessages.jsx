@@ -11,17 +11,15 @@ const ErrorMessages = ({ lang }) => {
   return (
     <div className="center">
       {((loginReducer.error && loginReducer.error.code === "ERR_NETWORK") ||
-        (regimesReducer.error && regimesReducer.error.code === "ERR_NETWORK") ||
-        (placesReducer.error && placesReducer.error.code === "ERR_NETWORK") ||
+        (regimesReducer.error &&
+          (regimesReducer.error.code === "ERR_NETWORK" ||
+            regimesReducer.error.code === 404)) ||
+        (placesReducer.error &&
+          (placesReducer.error.code === "ERR_NETWORK" ||
+            placesReducer.error.code === 404)) ||
         (orderReducer.error && orderReducer.error.code === "ERR_NETWORK")) && (
         <h2>{config.language[lang].serverOff}</h2>
       )}
-      {/* { && (
-        <h2>{config.language[lang].serverOff}</h2>
-      )}
-      { && (
-        <h2>{config.language[lang].serverOff}</h2>
-      )} */}
       {loginReducer.error && loginReducer.error === 202 && (
         <h2>{config.language[lang].status202}</h2>
       )}

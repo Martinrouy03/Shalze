@@ -53,7 +53,7 @@ const OnePage = () => {
   useEffect(() => {
     token && userId && config.codeRepas && dispatch(getOrder());
   }, [loginReducer.modalClose, config, userId, weekReducer.selectedWeek.month]);
-  console.log(orderReducer.order.id);
+  // console.log(orderReducer.order.id);
   useEffect(() => {
     places[0] && dispatch(initWeekStructure());
     places[0] &&
@@ -75,10 +75,10 @@ const OnePage = () => {
   return (
     <div>
       <Header lang={lang} setLang={setLang} initLang={initLang} token={token} />
-      <ErrorMessages lang={lang} />
       {config.language && !loginReducer.modalClose && !token && (
         <LoginModal lang={lang} />
       )}
+      <ErrorMessages lang={lang} />
       {!token ? (
         <div className="center">{config.language[lang].signinMessage}</div>
       ) : orderReducer.loading ? (

@@ -1,4 +1,5 @@
 // import { getPlacesValue } from "./PlacesActions";
+import { useSelector } from "react-redux";
 import { store } from "../app/App";
 import {
   convertDateToUnix,
@@ -66,7 +67,6 @@ export function initWeekStructure() {
     console.log("initWeekStructureBegin ");
     dispatch(initWeekStructureBegin());
     const places = store.getState().placesReducer.places;
-
     const weekStructure = places.map((place, index) => {
       return {
         rowId: place.rowid,

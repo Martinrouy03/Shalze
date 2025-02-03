@@ -10,8 +10,18 @@ export function getRegimes(token) {
         const_apiurl + "dklaccueil/dictionary/mealTypes" + "?DOLAPIKEY=" + token
       )
       .then((json) => {
-        console.log("getRegimesSuccess");
-        dispatch(getRegimesSuccess(json.data));
+        if (typeof json.data === "object") {
+          dispatch(getRegimesSuccess(json.data));
+          console.log("getRegimesSuccess");
+        } else {
+          dispatch(
+            getRegimesFailure({
+              code: 404,
+              message: "Server not Found",
+            })
+          );
+          console.log("getRegimesFailure");
+        }
       })
       .catch((error) => {
         console.log("getRegimesFailure");

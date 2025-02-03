@@ -14,8 +14,18 @@ export function getPlaces(token) {
           token
       )
       .then((json) => {
-        console.log("getPlacesSuccess");
-        dispatch(getPlacesSuccess(json.data));
+        if (typeof json.data === "object") {
+          dispatch(getPlacesSuccess(json.data));
+          console.log("getPlacesSuccess");
+        } else {
+          dispatch(
+            getPlacesFailure({
+              code: 404,
+              message: "Server not Found",
+            })
+          );
+          console.log("getPlacesFailure");
+        }
       })
       .catch((error) => {
         console.log("getPlacesFailure");

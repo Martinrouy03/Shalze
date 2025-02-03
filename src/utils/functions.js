@@ -136,10 +136,12 @@ export const isMealLineFull = (mealLine) => {
 };
 export const computeDateInfos = (mealLine) => {
   let output = { date: "", qty: 0 };
-  output.date = mealLine[new Date().getDay() || 7].disabled
-    ? setUnixDate(convertDateToUnix(new Date().setHours(0, 0, 0, 0)), 1)
-    : convertDateToUnix(new Date().setHours(0, 0, 0, 0));
-  output.qty = mealLine[new Date().getDay() || 7].disabled
+
+  const dayIdx = new Date().getDay() ? new Date().getDay() - 1 : 6;
+  output.date = mealLine[dayIdx].disabled // on retire un pour faire la conversion du getDay() (1,2,3...) à l'indice (0,1,2...)
+    ? setUnixDate(convertTimeToUnix(new Date().setHours(0, 0, 0, 0)), 1)
+    : convertTimeToUnix(new Date().setHours(0, 0, 0, 0));
+  output.qty = mealLine[dayIdx].disabled
     ? 7 - (new Date().getDay() || 7)
     : 7 - ((new Date().getDay() || 7) - 1);
   return output;

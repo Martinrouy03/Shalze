@@ -20,7 +20,7 @@ const SelectWeek = ({ lang }) => {
   const config = useSelector(
     (state) => state.configurationReducer.configuration
   );
-  const commandNb = useSelector((state) => state.orderReducer.order.commandNb);
+  const commandNb = useSelector((state) => state.orderReducer.commandNb);
   const selectedWeek = useSelector(
     (state) => state.weekStructureReducer.selectedWeek
   );
